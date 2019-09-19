@@ -181,6 +181,11 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
    */
   virtual Resource* createResource(const QString& resource) const = 0;
   /**
+   * @brief return a string describing the last error
+   * @return last error string
+   */
+  virtual QString errorString() const = 0;
+  /**
    * @brief this function create provider
    * @param providerName - name of desired provider
    * @return Provider* if succes, otherwise nullptr
@@ -204,7 +209,5 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
 };
 
 }  // namespace MediaProvider
-
-Q_DECLARE_METATYPE(QImage::Format)
 
 #endif  // MEDIA_PROVIDER_H

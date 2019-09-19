@@ -7,6 +7,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    add_definitions(-DQT_QML_DEBUG)
+endif()
+
 set(sources "src/main.cpp"
     "src/backend.h" "src/backend.cpp")
 

@@ -16,9 +16,10 @@ ImageProvider::~ImageProvider() = default;
 Resource *ImageProvider::createResource(const QString &resource) const {
   if (availableResources().contains(resource)) {
     return new ImageResource(getPath(resource));
-  } else {
-    return nullptr;
   }
+  setErrorString(
+      "Unable to create unexisting resource, check available resources");
+  return nullptr;
 }
 
 }  // namespace MediaProvider

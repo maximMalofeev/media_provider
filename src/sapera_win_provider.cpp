@@ -3,16 +3,17 @@
 #include <QDebug>
 #include <QTime>
 #include <QtConcurrent/QtConcurrent>
-#include "sapera_win_shortcuts.h"
 #include "sapera_win_resource.h"
+#include "sapera_win_shortcuts.h"
 
 namespace MediaProvider {
 
 const QString DEFAULT_ORIGIN = "sapera_server";
 
+// Check if able to create server and vendor is Dalsa
 static bool isServerAppropriate(const int serverIndex) {
   if (!SapManager::IsServerAccessible(serverIndex)) {
-    qWarning() << "Server not accessible";
+    qDebug() << "Server not accessible";
     return false;
     ;
   }
@@ -23,7 +24,7 @@ static bool isServerAppropriate(const int serverIndex) {
     bool isAppropriate = false;
     if (!getFeatureValue<std::string>(&acqDevice, VENDOR_FEATURE_NAME,
                                       deviceVendorName, error)) {
-      qWarning() << error.c_str();
+      qDebug() << error.c_str();
     } else {
       if (deviceVendorName == DALSA_VENDOR_NAME) {
         isAppropriate = true;
@@ -32,7 +33,7 @@ static bool isServerAppropriate(const int serverIndex) {
     acqDevice.Destroy();
     return isAppropriate;
   } else {
-    qWarning() << "Unable to create device for server index" << serverIndex;
+    qDebug() << "Unable to create device for server index" << serverIndex;
     return false;
   }
 }
@@ -42,6 +43,7 @@ struct SaperaProvider::Implementation {
   QString origin = DEFAULT_ORIGIN;
   QStringList availableResources;
   QFutureWatcher<QStringList> resourcesWartcher;
+  QString lastError;
 };
 
 SaperaProvider::SaperaProvider(QObject *parent) {
@@ -58,8 +60,13 @@ SaperaProvider::SaperaProvider(QObject *parent) {
                     SapManager::EventServerDisconnected |
                         SapManager::EventServerNew |
                         SapManager::EventServerConnected,
-                    newServerEvent, this)) {
-              qWarning() << "Unable to register server callback";
+                    onServerEvent, this)) {
+              qCritical() << "Unable to register server callback";
+              impl_->state = Invalid;
+              emit stateChanged();
+              impl_->lastError =
+                  QString("Unable to register server callback, reason: ") +
+                  SapManager::GetLastStatus();
             }
           });
 
@@ -68,10 +75,11 @@ SaperaProvider::SaperaProvider(QObject *parent) {
     for (auto server = 0; server < SapManager::GetServerCount(); server++) {
       char serverName[CORSERVER_MAX_STRLEN]{0};
       if (!SapManager::GetServerName(server, serverName)) {
-        qWarning() << "Unable to get name for server" << server;
+        qDebug() << "Unable to get name for server" << server;
         continue;
       }
 
+      qDebug() << "Checking" << serverName;
       if (isServerAppropriate(server)) {
         sources.push_back(serverName);
       }
@@ -97,6 +105,8 @@ bool SaperaProvider::setOrigin(const QString &orig) {
   if (impl_->origin == orig || orig == "") {
     return true;
   }
+  impl_->lastError =
+      "Unable to set origin, SpaeraProvider supports only default origin";
   return false;
 }
 
@@ -108,10 +118,16 @@ Resource *SaperaProvider::createResource(const QString &resource) const {
   if (impl_->availableResources.contains(resource)) {
     return new SaperaResource{resource};
   }
+  impl_->lastError =
+      "Unable to create unexisting resource, check available resources";
   return {};
 }
 
-void SaperaProvider::newServerEvent(SapManCallbackInfo *callbackInfo) {
+QString MediaProvider::SaperaProvider::errorString() const {
+  return impl_->lastError;
+}
+
+void SaperaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
   const auto serverIndex = callbackInfo->GetServerIndex();
   char serverName[CORSERVER_MAX_STRLEN]{0};
   if (!SapManager::GetServerName(serverIndex, serverName)) {

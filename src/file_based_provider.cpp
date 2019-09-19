@@ -8,6 +8,7 @@ struct FileBasedProvider::Implementation {
   QString origin;
   QStringList availableResources;
   QStringList filters;
+  mutable QString lastError;
 
   QStringList getAvailableResources() {
     QDir originDir(origin);
@@ -44,6 +45,7 @@ bool FileBasedProvider::setOrigin(const QString &orig) {
       }
       return true;
     } else if (!QDir(orig).exists()) {
+      setErrorString(orig + " not exists");
       return false;
     }
 
@@ -66,6 +68,8 @@ void FileBasedProvider::setAvailableResources(
   }
 }
 
+QString FileBasedProvider::errorString() const { return impl_->lastError; }
+
 void FileBasedProvider::timerEvent(QTimerEvent *event) {
   Q_UNUSED(event)
   setAvailableResources(impl_->getAvailableResources());
@@ -73,6 +77,10 @@ void FileBasedProvider::timerEvent(QTimerEvent *event) {
 
 QString FileBasedProvider::getPath(const QString &resource) const {
   return impl_->origin + "/" + resource;
+}
+
+void FileBasedProvider::setErrorString(const QString &errorStr) const {
+  impl_->lastError = errorStr;
 }
 
 }  // namespace MediaProvider

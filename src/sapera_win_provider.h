@@ -17,8 +17,9 @@ class SaperaProvider : public Provider {
   bool setOrigin(const QString &orig) override;
   QStringList availableResources() const override;
   Resource *createResource(const QString &resource) const override;
+  QString errorString() const override;
 
-  static void newServerEvent(SapManCallbackInfo *callbackInfo);
+  static void onServerEvent(SapManCallbackInfo *callbackInfo);
 
  private:
   struct Implementation;

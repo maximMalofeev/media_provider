@@ -6,8 +6,6 @@
 namespace MediaProvider {
 
 class SaperaResource : public Resource {
-  Q_OBJECT
-
  public:
   SaperaResource(const QString& resource, QObject* parent = nullptr);
   ~SaperaResource();

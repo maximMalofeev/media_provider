@@ -16,9 +16,10 @@ VideoProvider::~VideoProvider() = default;
 Resource *VideoProvider::createResource(const QString &resource) const {
   if (availableResources().contains(resource)) {
     return new VideoResource(getPath(resource));
-  } else {
-    return nullptr;
   }
+  setErrorString(
+      "Unable to create unexisting resource, check available resources");
+  return nullptr;
 }
 
 }  // namespace MediaProvider
