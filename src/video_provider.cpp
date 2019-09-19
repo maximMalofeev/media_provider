@@ -13,7 +13,7 @@ VideoProvider::VideoProvider(QObject *parent)
 
 VideoProvider::~VideoProvider() = default;
 
-Resource *VideoProvider::createResource(const QString &resource) const {
+Resource *VideoProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
     return new VideoResource(getPath(resource));
   }

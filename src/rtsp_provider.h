@@ -10,12 +10,8 @@ class RtspProvider : public Provider {
   RtspProvider(QObject* parent = nullptr);
   ~RtspProvider();
 
-  State state() const override;
-  QString origin() const override;
   bool setOrigin(const QString &orig) override;
-  QStringList availableResources() const override;
-  Resource *createResource(const QString &resource) const override;
-  QString errorString() const override;
+  Resource *createResource(const QString &resource) override;
 
  private:
   struct Implementation;

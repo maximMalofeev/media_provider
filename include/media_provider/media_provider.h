@@ -142,6 +142,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
   Q_PROPERTY(QString origin READ origin WRITE setOrigin NOTIFY originChanged)
   Q_PROPERTY(QStringList availableResources READ availableResources NOTIFY
                  availableResourcesChanged)
+  Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
  public:
   /**
    * @brief The State enum describes provider state,
@@ -151,40 +152,42 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
    */
   enum State { Initialising, Initialised, Invalid };
   Q_ENUM(State)
+
+  ~Provider();
   /**
    * @brief current provider state
    * @return current state
    */
-  virtual State state() const = 0;
+  virtual State state() const;
   /**
    * @brief this function return origin of available resources
    * @return string representation of resources origin
    */
-  virtual QString origin() const = 0;
+  virtual QString origin() const;
   /**
    * @brief set origin of resources
    * @param orig - if case of file resources it is a parent dir,
    * empty origin assume app current path
    * @return true if succes, otherwise false
    */
-  virtual bool setOrigin(const QString& orig) = 0;
+  virtual bool setOrigin(const QString& orig);
   /**
    * @brief this function return available resources of current origin
    * @return list of available resources
    */
-  virtual QStringList availableResources() const = 0;
+  virtual QStringList availableResources() const;
   /**
    * @brief creates Resource* from string representation
    * @param resource - resource string representation, could be
    * received from availableResources() method
    * @return Resource* if success, nullptr otherwise
    */
-  virtual Resource* createResource(const QString& resource) const = 0;
+  virtual Resource* createResource(const QString& resource) = 0;
   /**
    * @brief return a string describing the last error
    * @return last error string
    */
-  virtual QString errorString() const = 0;
+  virtual QString errorString() const;
   /**
    * @brief this function create provider
    * @param providerName - name of desired provider
@@ -202,10 +205,19 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
   void stateChanged();
   void originChanged();
   void availableResourcesChanged();
+  void errorStringChanged();
 
  protected:
   explicit Provider(QObject* parent = nullptr);
   Q_DISABLE_COPY(Provider);
+
+  void setState(const State state);
+  void setAvailableResources(const QStringList& availableResources);
+  void setErrorString(const QString& errorStr);
+
+ private:
+  struct Implementation;
+  QScopedPointer<Implementation> impl_;
 };
 
 }  // namespace MediaProvider

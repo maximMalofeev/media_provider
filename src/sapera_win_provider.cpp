@@ -39,22 +39,17 @@ static bool isServerAppropriate(const int serverIndex) {
 }
 
 struct SaperaProvider::Implementation {
-  State state = Initialising;
-  QString origin = DEFAULT_ORIGIN;
-  QStringList availableResources;
   QFutureWatcher<QStringList> resourcesWartcher;
-  QString lastError;
 };
 
 SaperaProvider::SaperaProvider(QObject *parent) {
   impl_.reset(new Implementation);
+  Provider::setOrigin(DEFAULT_ORIGIN);
 
   connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished,
           [this]() {
-            impl_->state = Initialised;
-            impl_->availableResources = impl_->resourcesWartcher.result();
-            emit stateChanged();
-            emit availableResourcesChanged();
+            setState(Initialised);
+            setAvailableResources(impl_->resourcesWartcher.result());
 
             if (!SapManager::RegisterServerCallback(
                     SapManager::EventServerDisconnected |
@@ -62,11 +57,10 @@ SaperaProvider::SaperaProvider(QObject *parent) {
                         SapManager::EventServerConnected,
                     onServerEvent, this)) {
               qCritical() << "Unable to register server callback";
-              impl_->state = Invalid;
-              emit stateChanged();
-              impl_->lastError =
+              setState(Invalid);
+              setErrorString(
                   QString("Unable to register server callback, reason: ") +
-                  SapManager::GetLastStatus();
+                  SapManager::GetLastStatus());
             }
           });
 
@@ -97,34 +91,22 @@ SaperaProvider::~SaperaProvider() {
   }
 }
 
-Provider::State SaperaProvider::state() const { return impl_->state; }
-
-QString SaperaProvider::origin() const { return impl_->origin; }
-
 bool SaperaProvider::setOrigin(const QString &orig) {
-  if (impl_->origin == orig || orig == "") {
+  if (origin() == orig || orig == "") {
     return true;
   }
-  impl_->lastError =
-      "Unable to set origin, SpaeraProvider supports only default origin";
+  setErrorString(
+      "Unable to set origin, SpaeraProvider supports only default origin");
   return false;
 }
 
-QStringList SaperaProvider::availableResources() const {
-  return impl_->availableResources;
-}
-
-Resource *SaperaProvider::createResource(const QString &resource) const {
-  if (impl_->availableResources.contains(resource)) {
+Resource *SaperaProvider::createResource(const QString &resource) {
+  if (availableResources().contains(resource)) {
     return new SaperaResource{resource};
   }
-  impl_->lastError =
-      "Unable to create unexisting resource, check available resources";
+  setErrorString(
+      "Unable to create unexisting resource, check available resources");
   return {};
-}
-
-QString MediaProvider::SaperaProvider::errorString() const {
-  return impl_->lastError;
 }
 
 void SaperaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
@@ -145,18 +127,20 @@ void SaperaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
 
   if (eventType == SapManager::EventServerDisconnected) {
     qDebug() << serverName << "disconnected";
-    auto index = provider->impl_->availableResources.indexOf(
+    auto index = provider->availableResources().indexOf(
         QRegExp(QString("%1.*").arg(serverName)));
     if (index != -1) {
-      provider->impl_->availableResources.removeAt(index);
-      emit provider->availableResourcesChanged();
+      auto availableRes = provider->availableResources();
+      availableRes.removeAt(index);
+      provider->setAvailableResources(availableRes);
     }
   } else if (eventType == SapManager::EventServerNew ||
              eventType == SapManager::EventServerConnected) {
     qDebug() << serverName << "connected";
     if (isServerAppropriate(serverIndex)) {
-      provider->impl_->availableResources.push_back(serverName);
-      emit provider->availableResourcesChanged();
+      auto availableRes = provider->availableResources();
+      availableRes.push_back(serverName);
+      provider->setAvailableResources(availableRes);
     }
   }
 }

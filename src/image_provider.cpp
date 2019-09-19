@@ -13,7 +13,7 @@ ImageProvider::ImageProvider(QObject *parent)
 
 ImageProvider::~ImageProvider() = default;
 
-Resource *ImageProvider::createResource(const QString &resource) const {
+Resource *ImageProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
     return new ImageResource(getPath(resource));
   }

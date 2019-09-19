@@ -12,12 +12,8 @@ class SaperaProvider : public Provider {
   SaperaProvider(QObject* parent = nullptr);
   ~SaperaProvider();
 
-  State state() const override;
-  QString origin() const override;
   bool setOrigin(const QString &orig) override;
-  QStringList availableResources() const override;
-  Resource *createResource(const QString &resource) const override;
-  QString errorString() const override;
+  Resource *createResource(const QString &resource) override;
 
   static void onServerEvent(SapManCallbackInfo *callbackInfo);
 

@@ -10,7 +10,7 @@ class VideoProvider : public FileBasedProvider {
   VideoProvider(QObject* parent = nullptr);
   ~VideoProvider();
 
-  Resource *createResource(const QString &resource) const override;
+  Resource *createResource(const QString &resource) override;
 
  private:
   struct Implementation;

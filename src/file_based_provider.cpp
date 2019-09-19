@@ -4,16 +4,11 @@
 namespace MediaProvider {
 
 struct FileBasedProvider::Implementation {
-  State state = Initialising;
-  QString origin;
-  QStringList availableResources;
   QStringList filters;
-  mutable QString lastError;
 
-  QStringList getAvailableResources() {
+  QStringList getAvailableResources(const QString &origin) {
     QDir originDir(origin);
     originDir.setNameFilters(filters);
-
     return originDir.entryList(QDir::Files);
   }
 };
@@ -22,65 +17,39 @@ FileBasedProvider::FileBasedProvider(const QStringList &filters,
                                      QObject *parent)
     : Provider(parent) {
   impl_.reset(new Implementation);
-  impl_->origin = QDir::currentPath();
+  setOrigin(QDir::currentPath());
   impl_->filters = filters;
-  impl_->availableResources = impl_->getAvailableResources();
-  impl_->state = Initialised;
+  setAvailableResources(impl_->getAvailableResources(origin()));
+  setState(Initialised);
   startTimer(1000);
 }
 
 FileBasedProvider::~FileBasedProvider() = default;
 
-Provider::State FileBasedProvider::state() const { return impl_->state; }
-
-QString FileBasedProvider::origin() const { return impl_->origin; }
-
 bool FileBasedProvider::setOrigin(const QString &orig) {
-  if (impl_->origin != orig) {
-    if (orig == "") {
-      if (impl_->origin != QDir::currentPath()) {
-        impl_->origin = QDir::currentPath();
-        emit originChanged();
-        setAvailableResources(impl_->getAvailableResources());
-      }
-      return true;
-    } else if (!QDir(orig).exists()) {
-      setErrorString(orig + " not exists");
-      return false;
+  if (orig == "") {
+    if (origin() != QDir::currentPath()) {
+      Provider::setOrigin(QDir::currentPath());
+      setAvailableResources(impl_->getAvailableResources(origin()));
     }
-
-    impl_->origin = orig;
-    emit originChanged();
-    setAvailableResources(impl_->getAvailableResources());
+    return true;
+  } else if (!QDir(orig).exists()) {
+    setErrorString(orig + " not exists");
+    return false;
   }
+
+  Provider::setOrigin(orig);
+  setAvailableResources(impl_->getAvailableResources(origin()));
   return true;
 }
 
-QStringList FileBasedProvider::availableResources() const {
-  return impl_->availableResources;
-}
-
-void FileBasedProvider::setAvailableResources(
-    const QStringList &availableResources) {
-  if (availableResources != impl_->availableResources) {
-    impl_->availableResources = availableResources;
-    emit availableResourcesChanged();
-  }
-}
-
-QString FileBasedProvider::errorString() const { return impl_->lastError; }
-
 void FileBasedProvider::timerEvent(QTimerEvent *event) {
   Q_UNUSED(event)
-  setAvailableResources(impl_->getAvailableResources());
+  setAvailableResources(impl_->getAvailableResources(origin()));
 }
 
 QString FileBasedProvider::getPath(const QString &resource) const {
-  return impl_->origin + "/" + resource;
-}
-
-void FileBasedProvider::setErrorString(const QString &errorStr) const {
-  impl_->lastError = errorStr;
+  return origin() + "/" + resource;
 }
 
 }  // namespace MediaProvider
