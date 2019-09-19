@@ -11,8 +11,6 @@ class VideoStream : public Stream {
   VideoStream(QMediaPlayer* player, QObject* parent = nullptr);
   ~VideoStream();
 
-  State state() const override;
-
  public slots:
   void start() override;
   void stop() override;

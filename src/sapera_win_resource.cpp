@@ -19,9 +19,9 @@ static QImage::Format sapFormatToQImageFormat(const char *sapFormat) {
 
 struct SaperaResource::Implementation {
   QSize size;
-  QImage::Format format = QImage::Format_Invalid;
+  QImage::Format format{QImage::Format_Invalid};
   QList<QVariant> availableColorFormats;
-  SaperaStream *stream = {};
+  SaperaStream *stream{};
   QFutureWatcher<bool> initWatcher;
 };
 

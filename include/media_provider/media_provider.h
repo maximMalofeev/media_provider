@@ -20,6 +20,7 @@ namespace MediaProvider {
 class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
   Q_OBJECT
   Q_PROPERTY(State state READ state NOTIFY stateChanged)
+  Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
 
  public:
   /**
@@ -27,11 +28,14 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
    */
   enum State { Stopped, Playing, Invalid };
   Q_ENUM(State)
+
+  ~Stream();
   /**
    * @brief current stream state
    * @return stream state
    */
-  virtual State state() const = 0;
+  virtual State state() const;
+  virtual QString errorString() const;
 
  public slots:
   /**
@@ -44,13 +48,20 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
   virtual void stop() = 0;
 
  signals:
-  void error(QString errorStr);
+  void errorStringChanged();
   void stateChanged();
   void newFrame(QImage frame, qlonglong timestamp);
 
  protected:
   explicit Stream(QObject* parent = nullptr);
   Q_DISABLE_COPY(Stream);
+
+  void setState(const State state);
+  void setErrorString(const QString& errorStr);
+
+ private:
+  struct Implementation;
+  QScopedPointer<Implementation> impl_;
 };
 
 class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {

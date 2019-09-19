@@ -10,8 +10,6 @@ class ImageStream : public Stream {
   ImageStream(QImage* image, QObject* parent = nullptr);
   ~ImageStream();
 
-  State state() const override;
-
  public slots:
   void start() override;
   void stop() override;

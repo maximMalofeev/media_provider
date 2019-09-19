@@ -3,8 +3,7 @@
 namespace MediaProvider {
 
 struct VideoStream::Implementation {
-  QMediaPlayer *player = {};
-  State state = State::Stopped;
+  QMediaPlayer *player{};
 };
 
 VideoStream::VideoStream(QMediaPlayer *player, QObject *parent)
@@ -13,17 +12,14 @@ VideoStream::VideoStream(QMediaPlayer *player, QObject *parent)
   connect(impl_->player, &QMediaPlayer::stateChanged,
           [this](QMediaPlayer::State state) {
             if (state == QMediaPlayer::PlayingState) {
-              impl_->state = Playing;
+              setState(Playing);
             } else {
-              impl_->state = Stopped;
+              setState(Stopped);
             }
-            emit stateChanged();
           });
 }
 
 VideoStream::~VideoStream() = default;
-
-Stream::State VideoStream::state() const { return impl_->state; }
 
 void VideoStream::start() { impl_->player->play(); }
 

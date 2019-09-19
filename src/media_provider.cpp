@@ -14,7 +14,34 @@
 namespace MediaProvider {
 
 // ==================Stream==================
-Stream::Stream(QObject *parent) : QObject(parent) {}
+struct Stream::Implementation {
+  State state = Stopped;
+  QString lastError;
+};
+
+Stream::Stream(QObject *parent) : QObject(parent) {
+  impl_.reset(new Implementation);
+}
+
+void Stream::setState(const Stream::State state) {
+  if (impl_->state != state) {
+    impl_->state = state;
+    emit stateChanged();
+  }
+}
+
+void Stream::setErrorString(const QString &errorStr) {
+  if (impl_->lastError != errorStr) {
+    impl_->lastError = errorStr;
+    emit errorStringChanged();
+  }
+}
+
+Stream::~Stream() {}
+
+Stream::State Stream::state() const { return impl_->state; }
+
+QString Stream::errorString() const { return impl_->lastError; }
 
 // ==================Resource==================
 struct Resource::Implementation {

@@ -7,7 +7,6 @@
 namespace MediaProvider {
 
 struct SaperaStream::Implementation {
-  State state = Stopped;
   QScopedPointer<SapAcqDevice> sapDevice{};
   QScopedPointer<SapBufferWithTrash> sapBufWithTrash;
   QScopedPointer<SapAcqDeviceToBuf> sapAcqDeviceToBuffer;
@@ -31,35 +30,34 @@ SaperaStream::~SaperaStream() {
   }
 }
 
-Stream::State SaperaStream::state() const { return impl_->state; }
-
 bool SaperaStream::initialise() {
   impl_->sapBufWithTrash.reset(
       new SapBufferWithTrash{4, impl_->sapDevice.get()});
   if (!impl_->sapBufWithTrash->Create()) {
-    impl_->state = Invalid;
-    qWarning() << "Unable to create SapBufferWithTrash, reason:"
-               << impl_->sapBufWithTrash->GetLastStatus();
+    setState(Invalid);
+    setErrorString(QString{"Unable to create SapBufferWithTrash, reason: "} +
+                   impl_->sapBufWithTrash->GetLastStatus());
     return false;
   }
 
   impl_->sapBufferProcessing =
       new SapBufferProcessing(impl_->sapBufWithTrash.get(), this);
   if (!impl_->sapBufferProcessing->Create()) {
-    impl_->state = Invalid;
-    qWarning() << "Unable to create SapBufferProcessing, reason:"
-               << impl_->sapBufferProcessing->GetLastStatus();
+    setState(Invalid);
+    setErrorString(QString{"Unable to create SapBufferProcessing, reason: "} +
+                   impl_->sapBufferProcessing->GetLastStatus());
     return false;
   }
   impl_->sapAcqDeviceToBuffer.reset(new SapAcqDeviceToBuf{
       impl_->sapDevice.get(), impl_->sapBufWithTrash.get(), XferCallback,
       impl_->sapBufferProcessing});
   if (!impl_->sapAcqDeviceToBuffer->Create()) {
-    impl_->state = Invalid;
-    qWarning() << "Unable to create SapAcqDeviceToBuf, reason:"
-               << impl_->sapAcqDeviceToBuffer->GetLastStatus();
+    setState(Invalid);
+    setErrorString(QString{"Unable to create SapAcqDeviceToBuf, reason: "} +
+                   impl_->sapAcqDeviceToBuffer->GetLastStatus());
     return false;
   }
+  // TODO figure out why i do SetAutoEmpty(false)
   impl_->sapAcqDeviceToBuffer->SetAutoEmpty(false);
 
   QObject::connect(impl_->sapBufferProcessing, &SapBufferProcessing::newFrame,
@@ -80,18 +78,16 @@ void SaperaStream::XferCallback(SapXferCallbackInfo *pInfo) {
 }
 
 void SaperaStream::start() {
-  if (impl_->state == Stopped) {
+  if (state() == Stopped) {
     impl_->sapAcqDeviceToBuffer->Grab();
-    impl_->state = Playing;
-    emit stateChanged();
+    setState(Playing);
   }
 }
 
 void SaperaStream::stop() {
-  if (impl_->state == Playing) {
-    impl_->state = Stopped;
-    emit stateChanged();
+  if (state() == Playing) {
     impl_->sapAcqDeviceToBuffer->Freeze();
+    setState(Stopped);
   }
 }
 

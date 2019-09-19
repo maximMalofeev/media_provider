@@ -13,8 +13,6 @@ class SaperaStream : public Stream {
   SaperaStream(const QString& resource, QObject* parent = nullptr);
   ~SaperaStream();
 
-  State state() const override;
-
   bool initialise();
   SapAcqDevice* sapDevice();
 

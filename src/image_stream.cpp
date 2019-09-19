@@ -4,25 +4,25 @@ namespace MediaProvider {
 
 struct ImageStream::Implementation {
   QImage *image = {};
-  State state = State::Stopped;
 };
 
 ImageStream::ImageStream(QImage *image, QObject *parent) : Stream(parent) {
   impl_.reset(new Implementation{image});
+  if(image->isNull()){
+    setState(Invalid);
+    setErrorString("Null image received");
+  }
 }
 
 ImageStream::~ImageStream() = default;
 
-Stream::State MediaProvider::ImageStream::state() const { return impl_->state; }
-
 void ImageStream::start() {
-  impl_->state = Playing;
-  emit stateChanged();
-
+  if(state() == Invalid){
+    return;
+  }
+  setState(Playing);
   emit newFrame(*impl_->image, 0);
-
-  impl_->state = Stopped;
-  emit stateChanged();
+  setState(Stopped);
 }
 
 void ImageStream::stop() {}
