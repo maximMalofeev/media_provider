@@ -7,7 +7,7 @@ namespace MediaProvider {
 
 class VideoResource : public QMediaPlayerBasedResource {
  public:
-  VideoResource(const QString& resource, QObject* parent = nullptr);
+  VideoResource(const QString& res, QObject* parent = nullptr);
   ~VideoResource();
 
   Stream* stream() override;

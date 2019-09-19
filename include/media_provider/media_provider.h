@@ -65,6 +65,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
   Q_PROPERTY(QImage::Format colorFormat READ colorFormat WRITE setColorFormat
                  NOTIFY colorFormatChanged)
   Q_PROPERTY(MediaProvider::Stream* stream READ stream NOTIFY streamChanged)
+  Q_PROPERTY(QString errorString READ errorString NOTIFY errorStringChanged)
  public:
   /**
    * @brief The State enum describes resource state,
@@ -74,16 +75,18 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
    */
   enum State { Initialising, Initialised, Invalid };
   Q_ENUM(State)
+
+  ~Resource();
   /**
    * @brief current resource state
    * @return current state
    */
-  virtual State state() const = 0;
+  virtual State state() const;
   /**
    * @brief resource string representation
    * @return resource string representation
    */
-  virtual QString resource() const = 0;
+  virtual QString resource() const;
   /**
    * @brief returns the dimensions of a resource
    * @return dimentions
@@ -122,6 +125,11 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
    * @return stream
    */
   virtual Stream* stream() = 0;
+  /**
+   * @brief return a string describing the last error
+   * @return last error string
+   */
+  virtual QString errorString() const;
 
  signals:
   void stateChanged();
@@ -130,10 +138,19 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
   void availableColorFormatsChanged();
   void colorFormatChanged();
   void streamChanged();
+  void errorStringChanged();
 
  protected:
   explicit Resource(QObject* parent = nullptr);
   Q_DISABLE_COPY(Resource);
+
+  void setState(const State state);
+  void setResource(const QString& resource);
+  void setErrorString(const QString& errorStr);
+
+ private:
+  struct Implementation;
+  QScopedPointer<Implementation> impl_;
 };
 
 class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {

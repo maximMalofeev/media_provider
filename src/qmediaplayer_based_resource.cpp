@@ -6,38 +6,36 @@
 namespace MediaProvider {
 
 struct QMediaPlayerBasedResource::Implementation {
-  QString resource;
-  Resource::State state = Resource::Initialising;
   QMediaPlayer* player = {};
   VideoSurface* videoSurface = {};
 };
 
-QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& resource,
+QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
                                                      QObject* parent)
     : Resource(parent) {
   impl_.reset(new Implementation);
-  impl_->resource = resource;
+  setResource(res);
   impl_->player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
-  connect(impl_->player, &QMediaPlayer::mediaStatusChanged,
-          [this](QMediaPlayer::MediaStatus status) {
-            if (status == QMediaPlayer::LoadedMedia &&
-                impl_->state == Initialising) {
-              impl_->state = Initialised;
-              emit stateChanged();
-              emit sizeChanged();
-              emit availableSizesChanged();
-              emit colorFormatChanged();
-              emit availableColorFormatsChanged();
-              qDebug() << "Media loaded";
-            }
-          });
+  connect(
+      impl_->player, &QMediaPlayer::mediaStatusChanged,
+      [this](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::LoadedMedia && state() == Initialising) {
+          setState(Initialised);
+          emit sizeChanged();
+          emit availableSizesChanged();
+          emit colorFormatChanged();
+          emit availableColorFormatsChanged();
+          qDebug() << "Media loaded";
+        }
+      });
   connect(impl_->player,
           QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
           [this](QMediaPlayer::Error error) {
             qDebug() << "Media player error:" << error << "-"
                      << impl_->player->errorString();
-            impl_->state = Invalid;
-            emit stateChanged();
+            setState(Invalid);
+            setErrorString(QString("Media player error: ") + error + " - " +
+                           impl_->player->errorString());
           });
 
   impl_->videoSurface = new VideoSurface(impl_->player);
@@ -46,42 +44,43 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& resource,
 
 QMediaPlayerBasedResource::~QMediaPlayerBasedResource() = default;
 
-Resource::State QMediaPlayerBasedResource::state() const {
-  return impl_->state;
-}
-
-QString QMediaPlayerBasedResource::resource() const { return impl_->resource; }
-
 QSize QMediaPlayerBasedResource::size() const {
-  if (impl_->state != Initialised) {
+  if (state() != Initialised) {
     return {};
   }
   return impl_->videoSurface->size();
 }
 
 bool QMediaPlayerBasedResource::setSize(const QSize& size) {
-  if (impl_->state != Initialised) {
+  if (state() != Initialised) {
     return false;
   }
-  if (impl_->player->metaData(QMediaMetaData::Resolution).toSize() == size) {
+  if (impl_->videoSurface->size() == size) {
     return true;
   } else {
+    setErrorString("The provider not supports setSize feature");
     return false;
   }
 }
 
 QList<QVariant> QMediaPlayerBasedResource::availableSizes() const {
-  if (impl_->state != Initialised) {
+  if (state() != Initialised) {
     return {};
   }
-  return {impl_->player->metaData(QMediaMetaData::Resolution).toSize()};
+  return {impl_->videoSurface->size()};
 }
 
 QList<QVariant> QMediaPlayerBasedResource::availableColorFormats() const {
+  if (state() != Initialised) {
+    return {};
+  }
   return {QVariant::fromValue(impl_->videoSurface->format())};
 }
 
 QImage::Format QMediaPlayerBasedResource::colorFormat() const {
+  if (state() != Initialised) {
+    return QImage::Format_Invalid;
+  }
   return impl_->videoSurface->format();
 }
 
@@ -89,6 +88,7 @@ bool QMediaPlayerBasedResource::setColorFormat(const QImage::Format format) {
   if (format == impl_->videoSurface->format()) {
     return true;
   } else {
+    setErrorString("The provider not supports setColorFormat feature");
     return false;
   }
 }

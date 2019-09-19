@@ -18,8 +18,6 @@ static QImage::Format sapFormatToQImageFormat(const char *sapFormat) {
 }
 
 struct SaperaResource::Implementation {
-  QString resource;
-  State state = Initialising;
   QSize size;
   QImage::Format format = QImage::Format_Invalid;
   QList<QVariant> availableColorFormats;
@@ -27,24 +25,22 @@ struct SaperaResource::Implementation {
   QFutureWatcher<bool> initWatcher;
 };
 
-SaperaResource::SaperaResource(const QString &resource, QObject *parent)
+SaperaResource::SaperaResource(const QString &res, QObject *parent)
     : Resource(parent) {
   impl_.reset(new Implementation);
-  impl_->resource = resource;
-  impl_->stream = new SaperaStream{resource, this};
+  setResource(res);
+  impl_->stream = new SaperaStream{res, this};
 
   connect(&impl_->initWatcher, &QFutureWatcher<bool>::finished, [this]() {
     if (impl_->initWatcher.result() && impl_->stream->initialise()) {
-      impl_->state = Initialised;
-
+      setState(Initialised);
       emit sizeChanged();
       emit availableSizesChanged();
       emit colorFormatChanged();
       emit availableColorFormatsChanged();
     } else {
-      impl_->state = Invalid;
+      setState(Invalid);
     }
-    emit stateChanged();
   });
 
   auto future = QtConcurrent::run([this]() {
@@ -75,7 +71,7 @@ SaperaResource::SaperaResource(const QString &resource, QObject *parent)
       }
       impl_->format = sapFormatToQImageFormat(currentFormat.c_str());
 
-      SapFeature feature(impl_->resource.toStdString().c_str());
+      SapFeature feature(resource().toStdString().c_str());
       if (feature.Create()) {
         BOOL status = false;
         BOOL isAvailable = false;
@@ -98,27 +94,29 @@ SaperaResource::SaperaResource(const QString &resource, QObject *parent)
               }
               return true;
             } else {
-              qWarning() << "Unable to get enum count, reason:"
-                         << feature.GetLastStatus();
+              setErrorString(QString{"Unable to get enum count, reason: "} +
+                             feature.GetLastStatus());
               feature.Destroy();
               return false;
             }
           } else {
-            qWarning() << "Unable to get feature info, reason:"
-                       << impl_->stream->sapDevice()->GetLastStatus();
+            setErrorString(QString{"Unable to get feature info, reason: "} +
+                           impl_->stream->sapDevice()->GetLastStatus());
             feature.Destroy();
             return false;
           }
         } else {
-          qWarning() << "Unable to get feature info, reason:"
-                     << impl_->stream->sapDevice()->GetLastStatus();
+          setErrorString(QString{"Feature not available, reason: "} +
+                         impl_->stream->sapDevice()->GetLastStatus());
           feature.Destroy();
           return false;
         }
       } else {
+        setErrorString("Unable to create feature");
         return false;
       }
     } else {
+      setErrorString("Unable to create SapAcqDevice");
       return false;
     }
   });
@@ -128,40 +126,37 @@ SaperaResource::SaperaResource(const QString &resource, QObject *parent)
 
 SaperaResource::~SaperaResource() {}
 
-Resource::State SaperaResource::state() const { return impl_->state; }
-
-QString SaperaResource::resource() const { return impl_->resource; }
-
 QSize SaperaResource::size() const {
-  if (impl_->state == Initialised) {
+  if (state() == Initialised) {
     return impl_->size;
   }
   return {};
 }
 
+// TODO set size to sap device
 bool SaperaResource::setSize(const QSize &size) {
-  if (impl_->state == Initialised && impl_->size == size) {
+  if (state() == Initialised && impl_->size == size) {
     return true;
   }
   return false;
 }
 
 QList<QVariant> SaperaResource::availableSizes() const {
-  if (impl_->state == Initialised) {
+  if (state() == Initialised) {
     return {impl_->size};
   }
   return {};
 }
 
 QList<QVariant> SaperaResource::availableColorFormats() const {
-  if (impl_->state == Initialised) {
+  if (state() == Initialised) {
     return impl_->availableColorFormats;
   }
   return {};
 }
 
 QImage::Format SaperaResource::colorFormat() const {
-  if (impl_->state == Initialised) {
+  if (state() == Initialised) {
     return impl_->format;
   }
   return QImage::Format_Invalid;
@@ -169,12 +164,12 @@ QImage::Format SaperaResource::colorFormat() const {
 
 // TODO set format to sap device
 bool SaperaResource::setColorFormat(const QImage::Format format) {
-  if (impl_->state == Initialised &&
-      impl_->availableColorFormats.contains(format)) {
+  if (state() == Initialised && impl_->availableColorFormats.contains(format)) {
     impl_->format = format;
     emit colorFormatChanged();
     return true;
   }
+  setErrorString("Unable to set unsupported color format");
   return false;
 }
 

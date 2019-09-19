@@ -7,11 +7,9 @@ namespace MediaProvider {
 
 class ImageResource : public Resource {
  public:
-  ImageResource(const QString& resource, QObject* parent = nullptr);
+  ImageResource(const QString& res, QObject* parent = nullptr);
   ~ImageResource();
 
-  State state() const override;
-  QString resource() const override;
   QSize size() const override;
   bool setSize(const QSize& size) override;
   QList<QVariant> availableSizes() const override;

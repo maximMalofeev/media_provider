@@ -12,11 +12,9 @@ class VideoSurface;
 class QMediaPlayerBasedResource : public Resource
 {
  public:
-  QMediaPlayerBasedResource(const QString& resource, QObject* parent = nullptr);
+  QMediaPlayerBasedResource(const QString& res, QObject* parent = nullptr);
   ~QMediaPlayerBasedResource();
 
-  State state() const override;
-  QString resource() const override;
   QSize size() const override;
   bool setSize(const QSize &size) override;
   QList<QVariant> availableSizes() const override;

@@ -7,11 +7,9 @@ namespace MediaProvider {
 
 class SaperaResource : public Resource {
  public:
-  SaperaResource(const QString& resource, QObject* parent = nullptr);
+  SaperaResource(const QString& res, QObject* parent = nullptr);
   ~SaperaResource();
 
-  State state() const override;
-  QString resource() const override;
   QSize size() const override;
   bool setSize(const QSize& size) override;
   QList<QVariant> availableSizes() const override;
