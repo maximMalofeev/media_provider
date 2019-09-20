@@ -19,8 +19,15 @@ struct Stream::Implementation {
   QString lastError;
 };
 
-Stream::Stream(QObject *parent) : QObject(parent) {
+Stream::Stream(Resource *parent) : QObject(parent) {
   impl_.reset(new Implementation);
+  connect(parent, &Resource::stateChanged, [this](){
+    auto res = dynamic_cast<Resource*>(this->parent());
+    if(res && res->state() == Resource::Invalid){
+      setState(Invalid);
+      setErrorString("Resource switched to Invalid state");
+    }
+  });
 }
 
 void Stream::setState(const Stream::State state) {

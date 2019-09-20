@@ -1,4 +1,5 @@
 #include "video_stream.h"
+#include <QMediaPlayer>
 
 namespace MediaProvider {
 
@@ -6,7 +7,7 @@ struct VideoStream::Implementation {
   QMediaPlayer *player{};
 };
 
-VideoStream::VideoStream(QMediaPlayer *player, QObject *parent)
+VideoStream::VideoStream(QMediaPlayer *player, Resource *parent)
     : Stream(parent) {
   impl_.reset(new Implementation{player});
   connect(impl_->player, &QMediaPlayer::stateChanged,

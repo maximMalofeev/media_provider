@@ -102,7 +102,9 @@ bool SaperaProvider::setOrigin(const QString &orig) {
 
 Resource *SaperaProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    return new SaperaResource{resource};
+    auto res = new SaperaResource{resource};
+    connect(this, &SaperaProvider::serverDisconnected, res, &SaperaResource::onServerDisconnected);
+    return res;
   }
   setErrorString(
       "Unable to create unexisting resource, check available resources");
@@ -127,6 +129,7 @@ void SaperaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
 
   if (eventType == SapManager::EventServerDisconnected) {
     qDebug() << serverName << "disconnected";
+    emit provider->serverDisconnected(QString{serverName});
     auto index = provider->availableResources().indexOf(
         QRegExp(QString("%1.*").arg(serverName)));
     if (index != -1) {

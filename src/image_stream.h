@@ -7,7 +7,7 @@ namespace MediaProvider {
 
 class ImageStream : public Stream {
  public:
-  ImageStream(QImage* image, QObject* parent = nullptr);
+  ImageStream(QImage* image, Resource* parent);
   ~ImageStream();
 
  public slots:

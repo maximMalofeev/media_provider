@@ -19,13 +19,16 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
   connect(
       impl_->player, &QMediaPlayer::mediaStatusChanged,
       [this](QMediaPlayer::MediaStatus status) {
+        qDebug() << "Media status changed to" << status;
         if (status == QMediaPlayer::LoadedMedia && state() == Initialising) {
           setState(Initialised);
           emit sizeChanged();
           emit availableSizesChanged();
           emit colorFormatChanged();
           emit availableColorFormatsChanged();
-          qDebug() << "Media loaded";
+        }else if(status == QMediaPlayer::InvalidMedia && state() == Initialising){
+          setState(Invalid);
+          setErrorString(impl_->player->errorString());
         }
       });
   connect(impl_->player,

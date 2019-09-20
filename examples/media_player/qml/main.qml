@@ -71,6 +71,16 @@ ApplicationWindow {
                                 text: backend.provider ? backend.provider.origin : ""
                                 font.pixelSize: 15
                                 horizontalAlignment: Qt.AlignHCenter
+                                Rectangle{
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 4
+                                    radius: 10
+                                    color: backend.provider.state === Provider.Initialising ? "blue" : backend.provider.state === Provider.Initialised ? "green" : "red"
+                                    width: parent.height - 2
+                                    height: parent.height - 2
+                                    ToolTip.visible: backend.provider.state === Provider.Invalid
+                                    ToolTip.text: backend.provider.errorString
+                                }
                             }
                             delegate: Button {
                                 width: parent.width
@@ -97,6 +107,7 @@ ApplicationWindow {
                         Label{
                             text: "Resource"
                             font.pixelSize: 14
+
                         }
                         Label{
                             Layout.fillWidth: true
@@ -110,6 +121,16 @@ ApplicationWindow {
                                 id: resLabelMouseArea
                                 anchors.fill: parent
                                 hoverEnabled: true
+                            }
+                            Rectangle{
+                                anchors.right: parent.right
+                                anchors.rightMargin: 4
+                                radius: 10
+                                color: backend.resource.state === Resource.Initialising ? "blue" : backend.resource.state === Resource.Initialised ? "green" : "red"
+                                width: parent.height - 2
+                                height: parent.height - 2
+                                ToolTip.visible: backend.resource.state === Resource.Invalid
+                                ToolTip.text: backend.resource.errorString
                             }
                         }
                         Label{
@@ -151,39 +172,6 @@ ApplicationWindow {
                         }
                     }
                 }
-                Frame{
-                    id: stream
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 90
-                    padding: 2
-                    visible: backend.resource && backend.resource.state === Resource.Initialised
-                    Button{
-                        id: startButton
-                        anchors{
-                            top: parent.top
-                            left: parent.left
-                            right: parent.right
-                            margins: 2
-                        }
-                        text: "Start"
-                        onClicked: {
-                            backend.resource.stream.start()
-                        }
-                    }
-                    Button{
-                        id: stopButton
-                        anchors{
-                            top: startButton.bottom
-                            left: parent.left
-                            right: parent.right
-                            margins: 2
-                        }
-                        text: "Stop"
-                        onClicked: {
-                            backend.resource.stream.stop()
-                        }
-                    }
-                }
             }
         }
         Frame{
@@ -191,8 +179,45 @@ ApplicationWindow {
             Layout.fillHeight: true
             VideoOutput{
                 anchors.fill: parent
+                anchors.bottomMargin: stream.height
                 source: backend
                 fillMode: VideoOutput.PreserveAspectFit
+            }
+            Frame{
+                id: stream
+                anchors{
+                    bottom: parent.bottom
+                    left: parent.left
+                    right: parent.right
+                }
+                padding: 2
+                visible: backend.resource
+                Row{
+                    anchors.centerIn: parent
+                    spacing: 2
+                    Rectangle{
+                        radius: 10
+                        color: backend.resource.stream.state === Stream.Stopped ? "blue" : backend.resource.stream.state === Stream.Playing ? "green" : "red"
+                        width: 20
+                        height: 20
+                        ToolTip.visible: backend.resource.stream.state === Stream.Invalid
+                        ToolTip.text: backend.resource.stream.errorString
+                    }
+                    Button{
+                        id: startButton
+                        text: "Start"
+                        onClicked: {
+                            backend.resource.stream.start()
+                        }
+                    }
+                    Button{
+                        id: stopButton
+                        text: "Stop"
+                        onClicked: {
+                            backend.resource.stream.stop()
+                        }
+                    }
+                }
             }
         }
     }

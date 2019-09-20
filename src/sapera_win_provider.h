@@ -8,6 +8,8 @@ class SapManCallbackInfo;
 namespace MediaProvider {
 
 class SaperaProvider : public Provider {
+  Q_OBJECT
+
  public:
   SaperaProvider(QObject* parent = nullptr);
   ~SaperaProvider();
@@ -16,6 +18,9 @@ class SaperaProvider : public Provider {
   Resource *createResource(const QString &resource) override;
 
   static void onServerEvent(SapManCallbackInfo *callbackInfo);
+
+ signals:
+  void serverDisconnected(QString serverName);
 
  private:
   struct Implementation;

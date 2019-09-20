@@ -7,14 +7,14 @@
 namespace MediaProvider {
 
 struct SaperaStream::Implementation {
-  QScopedPointer<SapAcqDevice> sapDevice{};
+  QScopedPointer<SapAcqDevice> sapDevice;
   QScopedPointer<SapBufferWithTrash> sapBufWithTrash;
   QScopedPointer<SapAcqDeviceToBuf> sapAcqDeviceToBuffer;
   SapBufferProcessing *sapBufferProcessing{};
   SapBufferProcessing *bufferProcessing{};
 };
 
-SaperaStream::SaperaStream(const QString &resource, QObject *parent)
+SaperaStream::SaperaStream(const QString &resource, Resource *parent)
     : Stream(parent) {
   impl_.reset(new Implementation);
   impl_->sapDevice.reset(

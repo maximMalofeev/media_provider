@@ -17,6 +17,8 @@ class QAbstractVideoSurface;
 
 namespace MediaProvider {
 
+class Resource;
+
 class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
   Q_OBJECT
   Q_PROPERTY(State state READ state NOTIFY stateChanged)
@@ -53,7 +55,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
   void newFrame(QImage frame, qlonglong timestamp);
 
  protected:
-  explicit Stream(QObject* parent = nullptr);
+  explicit Stream(Resource* parent = nullptr);
   Q_DISABLE_COPY(Stream);
 
   void setState(const State state);

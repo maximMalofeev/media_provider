@@ -2,13 +2,14 @@
 #define FILESTREAM_H
 
 #include <media_provider/media_provider.h>
-#include <QMediaPlayer>
+
+class QMediaPlayer;
 
 namespace MediaProvider {
 
 class VideoStream : public Stream {
  public:
-  VideoStream(QMediaPlayer* player, QObject* parent = nullptr);
+  VideoStream(QMediaPlayer* player, Resource* parent);
   ~VideoStream();
 
  public slots:

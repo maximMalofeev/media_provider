@@ -10,7 +10,7 @@ namespace MediaProvider {
 
 class SaperaStream : public Stream {
  public:
-  SaperaStream(const QString& resource, QObject* parent = nullptr);
+  SaperaStream(const QString& resource, Resource* parent);
   ~SaperaStream();
 
   bool initialise();

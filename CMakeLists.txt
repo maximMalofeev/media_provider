@@ -30,6 +30,7 @@ set(sources "include/media_provider/media_provider.h"
     "src/rtsp_resource.h" "src/rtsp_resource.cpp"
     "src/image_stream.h" "src/image_stream.cpp"
     "src/video_stream.h" "src/video_stream.cpp"
+    "src/rtsp_stream.h" "src/rtsp_stream.cpp"
     "src/video_surface.h" "src/video_surface.cpp")
 
 if(WIN32)

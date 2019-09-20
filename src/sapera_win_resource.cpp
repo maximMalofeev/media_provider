@@ -116,7 +116,8 @@ SaperaResource::SaperaResource(const QString &res, QObject *parent)
         return false;
       }
     } else {
-      setErrorString("Unable to create SapAcqDevice");
+      setErrorString(QString{"Unable to create SapAcqDevice, reason: "} +
+                     impl_->stream->sapDevice()->GetLastStatus());
       return false;
     }
   });
@@ -174,5 +175,12 @@ bool SaperaResource::setColorFormat(const QImage::Format format) {
 }
 
 Stream *SaperaResource::stream() { return impl_->stream; }
+
+void SaperaResource::onServerDisconnected(const QString &serverName) {
+  if (serverName == resource()) {
+    setState(Invalid);
+    setErrorString("Server disconnected");
+  }
+}
 
 }  // namespace MediaProvider

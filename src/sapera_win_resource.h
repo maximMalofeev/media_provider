@@ -6,6 +6,8 @@
 namespace MediaProvider {
 
 class SaperaResource : public Resource {
+  Q_OBJECT
+
  public:
   SaperaResource(const QString& res, QObject* parent = nullptr);
   ~SaperaResource();
@@ -17,6 +19,9 @@ class SaperaResource : public Resource {
   QImage::Format colorFormat() const override;
   bool setColorFormat(const QImage::Format format) override;
   Stream* stream() override;
+
+ public slots:
+  void onServerDisconnected(const QString& serverName);
 
  private:
   struct Implementation;
