@@ -1,5 +1,5 @@
 import QtQuick 2.12
-import QtQuick.Controls 2.5
+import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import QtMultimedia 5.13
 import MediaProvider 1.0
@@ -9,14 +9,14 @@ ApplicationWindow {
     width: 800
     height: 600
 
-    RowLayout{
+    SplitView{
         anchors.fill: parent
         anchors.margins: 4
         anchors.bottomMargin: footer.height
 
         Rectangle{
-            Layout.preferredWidth: 230
-            Layout.fillHeight: true
+            SplitView.preferredWidth: 230
+            SplitView.fillHeight: true
             ColumnLayout{
                 anchors.top: parent.top
                 anchors.left: parent.left
@@ -78,8 +78,16 @@ ApplicationWindow {
                                     color: backend.provider.state === Provider.Initialising ? "blue" : backend.provider.state === Provider.Initialised ? "green" : "red"
                                     width: parent.height - 2
                                     height: parent.height - 2
-                                    ToolTip.visible: backend.provider.state === Provider.Invalid
                                     ToolTip.text: backend.provider.errorString
+                                    MouseArea{
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        onHoveredChanged: {
+                                           if(containsMouse && backend.provider.errorString.length) {
+                                               parent.ToolTip.visible = true
+                                           }
+                                        }
+                                    }
                                 }
                             }
                             delegate: Button {
@@ -99,15 +107,16 @@ ApplicationWindow {
                     Layout.preferredHeight: 130
                     visible: backend.resource ? true : false
                     padding: 2
+
                     GridLayout{
                         id: resGrid
                         anchors.fill: parent
                         anchors.margins: 2
                         columns: 2
+
                         Label{
                             text: "Resource"
                             font.pixelSize: 14
-
                         }
                         Label{
                             Layout.fillWidth: true
@@ -115,8 +124,6 @@ ApplicationWindow {
                             font.pixelSize: 14
                             horizontalAlignment: Qt.AlignLeft
                             elide: Text.ElideRight
-                            ToolTip.text: backend.resource ? backend.resource.resource : ""
-                            ToolTip.visible: resLabelMouseArea.containsMouse
                             MouseArea{
                                 id: resLabelMouseArea
                                 anchors.fill: parent
@@ -129,8 +136,16 @@ ApplicationWindow {
                                 color: backend.resource.state === Resource.Initialising ? "blue" : backend.resource.state === Resource.Initialised ? "green" : "red"
                                 width: parent.height - 2
                                 height: parent.height - 2
-                                ToolTip.visible: backend.resource.state === Resource.Invalid
                                 ToolTip.text: backend.resource.errorString
+                                MouseArea{
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    onHoveredChanged: {
+                                       if(containsMouse && backend.resource.errorString.length) {
+                                           parent.ToolTip.visible = true
+                                       }
+                                    }
+                                }
                             }
                         }
                         Label{
@@ -148,7 +163,8 @@ ApplicationWindow {
                             }
                             contentItem: Label{
                                 verticalAlignment: Qt.AlignVCenter
-                                horizontalAlignment: Qt.AlignHCenter
+                                horizontalAlignment: Qt.AlignLeft
+                                leftPadding: 10
                                 text: resolutions.currentIndex !== -1
                                       ? resolutions.model[resolutions.currentIndex].width + " x " + resolutions.model[resolutions.currentIndex].height
                                       : ""
@@ -175,8 +191,8 @@ ApplicationWindow {
             }
         }
         Frame{
-            Layout.fillWidth: true
-            Layout.fillHeight: true
+            SplitView.fillWidth: true
+            SplitView.fillHeight: true
             VideoOutput{
                 anchors.fill: parent
                 anchors.bottomMargin: stream.height
@@ -200,8 +216,16 @@ ApplicationWindow {
                         color: backend.resource.stream.state === Stream.Stopped ? "blue" : backend.resource.stream.state === Stream.Playing ? "green" : "red"
                         width: 20
                         height: 20
-                        ToolTip.visible: backend.resource.stream.state === Stream.Invalid
                         ToolTip.text: backend.resource.stream.errorString
+                        MouseArea{
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onHoveredChanged: {
+                               if(containsMouse && backend.resource.stream.errorString.length) {
+                                   parent.ToolTip.visible = true
+                               }
+                            }
+                        }
                     }
                     Button{
                         id: startButton

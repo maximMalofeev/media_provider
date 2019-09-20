@@ -37,8 +37,11 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
             qDebug() << "Media player error:" << error << "-"
                      << impl_->player->errorString();
             setState(Invalid);
-            setErrorString(QString("Media player error: ") + error + " - " +
-                           impl_->player->errorString());
+            QString errStr = "Media player error: " + QString::number(error);
+            if(!impl_->player->errorString().isEmpty()){
+              errStr += " - " + impl_->player->errorString();
+            }
+            setErrorString(errStr);
           });
 
   impl_->videoSurface = new VideoSurface(impl_->player);
