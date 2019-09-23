@@ -20,6 +20,8 @@ VideoSurface::VideoSurface(QObject* parent) : QAbstractVideoSurface(parent) {
   });
 }
 
+VideoSurface::~VideoSurface() {}
+
 QList<QVideoFrame::PixelFormat> VideoSurface::supportedPixelFormats(
     QAbstractVideoBuffer::HandleType handleType) const {
   if (handleType == QAbstractVideoBuffer::NoHandle) {
@@ -50,12 +52,12 @@ bool VideoSurface::present(const QVideoFrame& frame) {
     QVideoFrame cloneFrame(frame);
 
     auto future = QtConcurrent::run(
-        [this](QVideoFrame cloneFrame) {
+        [](QVideoFrame cloneFrame) {
           if (cloneFrame.map(QAbstractVideoBuffer::ReadOnly)) {
             auto timestamp = cloneFrame.startTime();
             auto mappedBytes = cloneFrame.mappedBytes();
             uchar* frameBuf = new uchar[mappedBytes];
-            std::memcpy(frameBuf, cloneFrame.bits(), mappedBytes);
+            memcpy(frameBuf, cloneFrame.bits(), mappedBytes);
             QImage image(
                 frameBuf, cloneFrame.width(), cloneFrame.height(),
                 cloneFrame.bytesPerLine(),

@@ -13,6 +13,7 @@ class VideoSurface : public QAbstractVideoSurface {
 
  public:
   VideoSurface(QObject* parent = nullptr);
+  ~VideoSurface();
 
   QList<QVideoFrame::PixelFormat> supportedPixelFormats(
       QAbstractVideoBuffer::HandleType handleType =
