@@ -22,6 +22,7 @@ SaperaStream::SaperaStream(const QString &resource, Resource *parent)
 }
 
 SaperaStream::~SaperaStream() {
+  stop();
   if (impl_->sapAcqDeviceToBuffer) {
     impl_->sapAcqDeviceToBuffer->Destroy();
   }
@@ -78,17 +79,23 @@ void SaperaStream::XferCallback(SapXferCallbackInfo *pInfo) {
 }
 
 void SaperaStream::start() {
-  if (state() == Stopped) {
-    impl_->sapAcqDeviceToBuffer->Grab();
-    setState(Playing);
+  if (auto s = state(); s == Invalid || s == Playing) {
+    return;
   }
+  if(!impl_->sapAcqDeviceToBuffer->Grab()){
+    setState(Invalid);
+    setErrorString(QString{"Unable to grab, reason"} + impl_->sapAcqDeviceToBuffer->GetLastStatus());
+    return;
+  }
+  setState(Playing);
 }
 
 void SaperaStream::stop() {
-  if (state() == Playing) {
-    impl_->sapAcqDeviceToBuffer->Freeze();
-    setState(Stopped);
+  if (auto s = state(); s == Invalid || s == Stopped) {
+    return;
   }
+  impl_->sapAcqDeviceToBuffer->Freeze();
+  setState(Stopped);
 }
 
 }  // namespace MediaProvider

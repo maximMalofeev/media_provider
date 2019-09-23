@@ -20,14 +20,27 @@ VideoStream::VideoStream(QMediaPlayer *player, Resource *parent)
           });
 }
 
-VideoStream::~VideoStream() = default;
+VideoStream::~VideoStream() {
+  stop();
+}
 
-void VideoStream::start() { impl_->player->play(); }
+void VideoStream::start() {
+  if (auto s = state(); s == Invalid || s == Playing) {
+    return;
+  }
+  impl_->player->play();
+}
 
-void VideoStream::stop() { impl_->player->stop(); }
+void VideoStream::stop() {
+  if (auto s = state(); s == Invalid || s == Stopped) {
+    return;
+  }
+  impl_->player->stop();
+}
 
 void VideoStream::onNewFrame(QImage frame, qlonglong timestamp) {
-  if (impl_->player->state() == QMediaPlayer::StoppedState) {
+  if (impl_->player->state() == QMediaPlayer::StoppedState ||
+      state() == Invalid) {
     return;
   }
   emit newFrame(frame, timestamp == -1 ? impl_->player->position() : timestamp);

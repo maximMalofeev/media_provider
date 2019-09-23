@@ -29,17 +29,19 @@ RtspStream::RtspStream(QMediaPlayer *player, Resource *parent) {
           });
 }
 
-RtspStream::~RtspStream() = default;
+RtspStream::~RtspStream() {
+  stop();
+}
 
 void RtspStream::start() {
-  if (state() == Invalid) {
+  if (auto s = state(); s == Invalid || s == Playing) {
     return;
   }
   impl_->player->play();
 }
 
 void RtspStream::stop() {
-  if (state() == Invalid) {
+  if (auto s = state(); s == Invalid || s == Stopped) {
     return;
   }
   impl_->player->stop();
