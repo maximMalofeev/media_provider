@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.10)
 
 project(media_provider)
 
@@ -40,6 +40,12 @@ if(WIN32)
         "src/sapera_win_stream.h" "src/sapera_win_stream.cpp"
         "src/sapera_win_buffer_processing.h" "src/sapera_win_buffer_processing.cpp"
         "src/sapera_win_shortcuts.h" "src/sapera_win_shortcuts.cpp")
+elseif(UNIX)
+    set(sources ${sources}
+        "src/sapera_lnx_provider.h" "src/sapera_lnx_provider.cpp"
+        #"src/sapera_lnx_resource.h" "src/sapera_lnx_resource.cpp"
+        #"src/sapera_lnx_stream.h" "src/sapera_lnx_stream.cpp"
+        )
 endif()
 
 add_library(${PROJECT_NAME} ${sources})
@@ -56,7 +62,10 @@ if(WIN32)
         PRIVATE "$ENV{SAPERADIR}/Include")
     target_link_libraries(${PROJECT_NAME} "$ENV{SAPERADIR}/Lib/Win32/SapClassBasic.lib")
 elseif(UNIX)
-
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DMEDIAPROVIDERLIB_LIBRARY)
+    target_include_directories(${PROJECT_NAME} PRIVATE "$ENV{GENICAM_ROOT_V3_0}/library/CPP/include" PRIVATE "/usr/dalsa/GigeV/include")
+    target_link_libraries(${PROJECT_NAME} "$ENV{GENICAM_ROOT_V3_0}/bin/Linux64_x64/libGenApi_gcc421_v3_0.so"
+        "$ENV{GENICAM_ROOT_V3_0}/bin/Linux64_x64/libGCBase_gcc421_v3_0.so" GevApi)
 endif()
 
 add_subdirectory(examples)

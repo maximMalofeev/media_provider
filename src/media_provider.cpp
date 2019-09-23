@@ -7,6 +7,10 @@
 #ifdef WIN32
 #include <SapClassBasic.h>
 #include "sapera_win_provider.h"
+#elif unix
+#include <GenApi/GenApi.h>
+#include <gevapi.h>
+#include "sapera_lnx_provider.h"
 #endif
 
 #include "video_provider.h"
@@ -21,9 +25,9 @@ struct Stream::Implementation {
 
 Stream::Stream(Resource *parent) : QObject(parent) {
   impl_.reset(new Implementation);
-  connect(parent, &Resource::stateChanged, [this](){
-    auto res = dynamic_cast<Resource*>(this->parent());
-    if(res && res->state() == Resource::Invalid){
+  connect(parent, &Resource::stateChanged, [this]() {
+    auto res = dynamic_cast<Resource *>(this->parent());
+    if (res && res->state() == Resource::Invalid) {
       setState(Invalid);
       setErrorString("Resource switched to Invalid state");
     }
@@ -151,6 +155,14 @@ Provider *Provider::createProvider(const QString &providerName,
   } else if (providerName == "SaperaProvider") {
 #ifdef WIN32
     SapManager::SetDisplayStatusMode(SapManager::StatusLog);
+#elif unix
+    GEVLIB_CONFIG_OPTIONS options = {0};
+
+    GevGetLibraryConfigOptions(&options);
+    // options.logLevel = GEV_LOG_LEVEL_OFF;
+    // options.logLevel = GEV_LOG_LEVEL_TRACE;
+    options.logLevel = GEV_LOG_LEVEL_NORMAL;
+    GevSetLibraryConfigOptions(&options);
 #endif
     return new SaperaProvider(parent);
   } else {
