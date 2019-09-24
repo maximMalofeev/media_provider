@@ -43,7 +43,7 @@ if(WIN32)
 elseif(UNIX)
     set(sources ${sources}
         "src/sapera_lnx_provider.h" "src/sapera_lnx_provider.cpp"
-        #"src/sapera_lnx_resource.h" "src/sapera_lnx_resource.cpp"
+        "src/sapera_lnx_resource.h" "src/sapera_lnx_resource.cpp"
         #"src/sapera_lnx_stream.h" "src/sapera_lnx_stream.cpp"
         )
 endif()

@@ -1,6 +1,7 @@
 #include "sapera_lnx_provider.h"
 #include <GenApi/GenApi.h>
 #include <gevapi.h>
+#include "sapera_lnx_resource.h"
 
 namespace MediaProvider {
 
@@ -49,8 +50,9 @@ bool SaperaProvider::setOrigin(const QString &orig) {
 
 Resource *SaperaProvider::createResource(const QString &resource) {
   if(availableResources().contains(resource)){
-    return {};
+    return new SaperaResource(resource);
   }
+  setErrorString("There is no requested resource");
   return {};
 }
 
