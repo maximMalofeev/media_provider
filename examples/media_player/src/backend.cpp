@@ -1,10 +1,20 @@
 #include "backend.h"
 #include <media_provider/media_provider.h>
-#include <QDebug>
 #include <QAbstractVideoSurface>
+#include <QDebug>
 #include <QVideoSurfaceFormat>
 
 Backend::Backend(QObject *parent) : QObject(parent) {}
+
+Backend::~Backend() {
+  qDebug() << "Backend::~Backend()";
+  if(resource_){
+    delete resource_;
+  }
+  if(provider_){
+    delete provider_;
+  }
+}
 
 QStringList Backend::providers() const {
   return MediaProvider::Provider::availableProviders();
@@ -19,7 +29,7 @@ void Backend::createProvider(const QString &providerName) {
     }
     provider_ = provider;
     emit providerChanged();
-    provider_->setOrigin("F:/mediaFolder");
+    provider_->setOrigin("");
   }
 }
 
@@ -31,23 +41,39 @@ void Backend::createResource(const QString &resourceName) {
       resource_->deleteLater();
     }
     resource_ = resource;
-    connect(resource_, &MediaProvider::Resource::stateChanged, [this](){
-      if(resource_->state() == MediaProvider::Resource::Initialised){
-        if (videoSurface_) {
-          qDebug() << "==VideoSurface available==";
-          if (videoSurface_->isActive()) {
-            videoSurface_->stop();
-          }
-          if (resource_) {
-            QVideoSurfaceFormat format(
-                resource_->size(),
-                QVideoFrame::pixelFormatFromImageFormat(QImage::Format_RGB32));
-            videoSurface_->nearestFormat(format);
-            videoSurface_->start(format);
-          }
+    if (resource_->state() == MediaProvider::Resource::Initialised) {
+      if (videoSurface_) {
+        qDebug() << "==VideoSurface available==";
+        if (videoSurface_->isActive()) {
+          videoSurface_->stop();
+        }
+        if (resource_) {
+          QVideoSurfaceFormat format(
+              resource_->size(), QVideoFrame::pixelFormatFromImageFormat(
+                                     QImage::Format_RGB32));
+          videoSurface_->nearestFormat(format);
+          videoSurface_->start(format);
         }
       }
-    });
+    } else {
+      connect(resource_, &MediaProvider::Resource::stateChanged, [this]() {
+        if (resource_->state() == MediaProvider::Resource::Initialised) {
+          if (videoSurface_) {
+            qDebug() << "==VideoSurface available==";
+            if (videoSurface_->isActive()) {
+              videoSurface_->stop();
+            }
+            if (resource_) {
+              QVideoSurfaceFormat format(
+                  resource_->size(), QVideoFrame::pixelFormatFromImageFormat(
+                                         QImage::Format_RGB32));
+              videoSurface_->nearestFormat(format);
+              videoSurface_->start(format);
+            }
+          }
+        }
+      });
+    }
     connect(resource_->stream(), &MediaProvider::Stream::newFrame, this,
             &Backend::onNewFrame);
     emit resourceChanged();
@@ -55,6 +81,7 @@ void Backend::createResource(const QString &resourceName) {
 }
 
 void Backend::onNewFrame(QImage image, qlonglong timestamp) {
+  Q_UNUSED(timestamp)
   QVideoFrame frame(image.convertToFormat(QImage::Format_RGB32));
   if (!frame.isValid()) {
     qWarning() << "frame invalid";

@@ -154,15 +154,8 @@ Provider *Provider::createProvider(const QString &providerName,
     return new RtspProvider(parent);
   } else if (providerName == "SaperaProvider") {
 #ifdef WIN32
+    //TODO move to Provider constructor
     SapManager::SetDisplayStatusMode(SapManager::StatusLog);
-#elif unix
-    GEVLIB_CONFIG_OPTIONS options = {0};
-
-    GevGetLibraryConfigOptions(&options);
-    // options.logLevel = GEV_LOG_LEVEL_OFF;
-    // options.logLevel = GEV_LOG_LEVEL_TRACE;
-    options.logLevel = GEV_LOG_LEVEL_NORMAL;
-    GevSetLibraryConfigOptions(&options);
 #endif
     return new SaperaProvider(parent);
   } else {

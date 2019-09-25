@@ -18,6 +18,7 @@ class Backend : public QObject {
 
  public:
   explicit Backend(QObject* parent = nullptr);
+  ~Backend();
 
   QStringList providers() const;
 

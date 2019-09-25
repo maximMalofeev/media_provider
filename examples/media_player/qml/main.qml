@@ -193,6 +193,7 @@ ApplicationWindow {
         Frame{
             SplitView.fillWidth: true
             SplitView.fillHeight: true
+
             VideoOutput{
                 anchors.fill: parent
                 anchors.bottomMargin: stream.height
