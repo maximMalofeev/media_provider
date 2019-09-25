@@ -60,6 +60,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
 
   void setState(const State state);
   void setErrorString(const QString& errorStr);
+  Resource* resource() const;
 
  private:
   struct Implementation;

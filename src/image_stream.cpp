@@ -13,6 +13,9 @@ ImageStream::ImageStream(QImage *image, Resource *parent) : Stream(parent) {
 ImageStream::~ImageStream() = default;
 
 void ImageStream::start() {
+  if(resource()->state() != Resource::Initialised){
+    return;
+  }
   if(impl_->image->isNull()){
     setState(Invalid);
     setErrorString("Null image received");

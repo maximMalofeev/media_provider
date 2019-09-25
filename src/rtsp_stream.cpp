@@ -34,6 +34,9 @@ RtspStream::~RtspStream() {
 }
 
 void RtspStream::start() {
+  if(resource()->state() != Resource::Initialised){
+    return;
+  }
   if (auto s = state(); s == Invalid || s == Playing) {
     return;
   }

@@ -84,6 +84,8 @@ void SapBufferProcessing::stop() {
 void SapBufferProcessing::run() {
   qDebug() << "SapBufferProcessing started";
 
+  auto cameraInfo = GevGetCameraInfo(impl_->handle);
+
   GEV_BUFFER_OBJECT* img = nullptr;
   GEV_STATUS status = 0;
   UINT32 totalBuffers{}, numUsed{}, numFree{}, numTrashed{};
@@ -108,23 +110,17 @@ void SapBufferProcessing::run() {
           }
 
           qDebug() << QTime::currentTime();
-          QImage newImg{img->address, static_cast<int>(img->w),
-                        static_cast<int>(img->h), format};
+          auto frameSize = img->w * img->h * img->d;
+          uchar* frame = new uchar[frameSize]{0};
+          memcpy(frame, img->address, frameSize);
+
+          QImage newImg{frame,
+                        static_cast<int>(img->w),
+                        static_cast<int>(img->h),
+                        format,
+                        [](void* p) { delete static_cast<uchar*>(p); },
+                        frame};
           emit newFrame(newImg, -1);
-
-          //          auto frameSize = img->w * img->h * img->d;
-          //          uchar* frame = new uchar[frameSize]{0};
-          //          memcpy(frame, img->address, frameSize);
-
-          //          qDebug() << "Timestamp:" << img->timestamp_lo;
-
-          //          QImage newImg{frame,
-          //                        static_cast<int>(img->w),
-          //                        static_cast<int>(img->h),
-          //                        format,
-          //                        [](void* p) { delete static_cast<uchar*>(p);
-          //                        }, frame};
-          //          emit newFrame(newImg, -1);
         }
       }else{
         qDebug() << "GEV_BUFFER_OBJECT is nullptr";
@@ -133,7 +129,6 @@ void SapBufferProcessing::run() {
     else{
       qDebug() << "GevWaitForNextImage failed with status:" << status;
       if(status == static_cast<unsigned short>(GEVLIB_ERROR_TIME_OUT)){
-        //TODO try to reconnect
         emit error("Wait for next image timed out");
       }else{
         emit error("Wait for next image failed with status: " + QString::number(status));

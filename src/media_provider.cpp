@@ -21,10 +21,12 @@ namespace MediaProvider {
 struct Stream::Implementation {
   State state = Stopped;
   QString lastError;
+  Resource *resource;
 };
 
 Stream::Stream(Resource *parent) : QObject(parent) {
   impl_.reset(new Implementation);
+  impl_->resource = parent;
   connect(parent, &Resource::stateChanged, [this]() {
     auto res = dynamic_cast<Resource *>(this->parent());
     if (res && res->state() == Resource::Invalid) {
@@ -47,6 +49,8 @@ void Stream::setErrorString(const QString &errorStr) {
     emit errorStringChanged();
   }
 }
+
+Resource *Stream::resource() const { return impl_->resource; }
 
 Stream::~Stream() {}
 
@@ -154,7 +158,7 @@ Provider *Provider::createProvider(const QString &providerName,
     return new RtspProvider(parent);
   } else if (providerName == "SaperaProvider") {
 #ifdef WIN32
-    //TODO move to Provider constructor
+    // TODO move to Provider constructor
     SapManager::SetDisplayStatusMode(SapManager::StatusLog);
 #endif
     return new SaperaProvider(parent);
