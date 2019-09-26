@@ -1,4 +1,4 @@
-#include "sapera_win_buffer_processing.h"
+#include "dalsa_win_buffer_processing.h"
 #include <QDebug>
 
 namespace MediaProvider {

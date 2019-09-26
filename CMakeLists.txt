@@ -35,17 +35,17 @@ set(sources "include/media_provider/media_provider.h"
 
 if(WIN32)
     set(sources ${sources}
-        "src/sapera_win_provider.h" "src/sapera_win_provider.cpp"
-        "src/sapera_win_resource.h" "src/sapera_win_resource.cpp"
-        "src/sapera_win_stream.h" "src/sapera_win_stream.cpp"
-        "src/sapera_win_buffer_processing.h" "src/sapera_win_buffer_processing.cpp"
-        "src/sapera_win_shortcuts.h" "src/sapera_win_shortcuts.cpp")
+        "src/dalsa_win_provider.h" "src/dalsa_win_provider.cpp"
+        "src/dalsa_win_resource.h" "src/dalsa_win_resource.cpp"
+        "src/dalsa_win_stream.h" "src/dalsa_win_stream.cpp"
+        "src/dalsa_win_buffer_processing.h" "src/dalsa_win_buffer_processing.cpp"
+        "src/dalsa_win_shortcuts.h" "src/dalsa_win_shortcuts.cpp")
 elseif(UNIX)
     set(sources ${sources}
-        "src/sapera_lnx_provider.h" "src/sapera_lnx_provider.cpp"
-        "src/sapera_lnx_resource.h" "src/sapera_lnx_resource.cpp"
-        "src/sapera_lnx_stream.h" "src/sapera_lnx_stream.cpp"
-        "src/sapera_lnx_buffer_processing.h" "src/sapera_lnx_buffer_processing.cpp"
+        "src/dalsa_lnx_provider.h" "src/dalsa_lnx_provider.cpp"
+        "src/dalsa_lnx_resource.h" "src/dalsa_lnx_resource.cpp"
+        "src/dalsa_lnx_stream.h" "src/dalsa_lnx_stream.cpp"
+        "src/dalsa_lnx_buffer_processing.h" "src/dalsa_lnx_buffer_processing.cpp"
         )
 endif()
 

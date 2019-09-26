@@ -1,8 +1,8 @@
-#include "sapera_win_stream.h"
+#include "dalsa_win_stream.h"
 #include <SapClassBasic.h>
 #include <QDebug>
-#include "sapera_win_buffer_processing.h"
-#include "sapera_win_resource.h"
+#include "dalsa_win_buffer_processing.h"
+#include "dalsa_win_resource.h"
 
 namespace MediaProvider {
 

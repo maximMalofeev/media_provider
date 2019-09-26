@@ -3,17 +3,12 @@
 #include <QDebug>
 #include "image_provider.h"
 #include "rtsp_provider.h"
-
+#include "video_provider.h"
 #ifdef WIN32
-#include <SapClassBasic.h>
-#include "sapera_win_provider.h"
+#include "dalsa_win_provider.h"
 #elif unix
-#include <GenApi/GenApi.h>
-#include <gevapi.h>
 #include "sapera_lnx_provider.h"
 #endif
-
-#include "video_provider.h"
 
 namespace MediaProvider {
 
@@ -157,10 +152,6 @@ Provider *Provider::createProvider(const QString &providerName,
   } else if (providerName == "RtspProvider") {
     return new RtspProvider(parent);
   } else if (providerName == "SaperaProvider") {
-#ifdef WIN32
-    // TODO move to Provider constructor
-    SapManager::SetDisplayStatusMode(SapManager::StatusLog);
-#endif
     return new SaperaProvider(parent);
   } else {
     return {};

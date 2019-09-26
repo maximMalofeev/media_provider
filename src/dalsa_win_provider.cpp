@@ -1,10 +1,10 @@
-#include "sapera_win_provider.h"
+#include "dalsa_win_provider.h"
 #include <SapClassBasic.h>
 #include <QDebug>
 #include <QTime>
 #include <QtConcurrent/QtConcurrent>
-#include "sapera_win_resource.h"
-#include "sapera_win_shortcuts.h"
+#include "dalsa_win_resource.h"
+#include "dalsa_win_shortcuts.h"
 
 namespace MediaProvider {
 
@@ -45,6 +45,8 @@ struct SaperaProvider::Implementation {
 SaperaProvider::SaperaProvider(QObject *parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(DEFAULT_ORIGIN);
+
+  SapManager::SetDisplayStatusMode(SapManager::StatusLog);
 
   connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished,
           [this]() {

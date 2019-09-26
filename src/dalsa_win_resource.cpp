@@ -1,4 +1,4 @@
-#include "sapera_win_resource.h"
+#include "dalsa_win_resource.h"
 #include <SapClassBasic.h>
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
