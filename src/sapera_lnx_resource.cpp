@@ -54,6 +54,41 @@ SaperaResource::SaperaResource(const QString &res, QObject *parent)
       return false;
     }
 
+    status = GevInitCameraRegisters(impl_->handle);
+    if(status != GEVLIB_OK){
+      setErrorString("Unable to init gev camera registers, status: " + QString::number(status));
+      return false;
+    }
+
+    DALSA_GENICAM_GIGE_REGS regs;
+    status = GevGetCameraRegisters(impl_->handle, &regs, sizeof(DALSA_GENICAM_GIGE_REGS));
+    if(status != GEVLIB_OK){
+      setErrorString("Unable to get camera registers, status: " + QString::number(status));
+      return false;
+    }
+
+    UINT32 width, height, format;
+    status = GevRegisterReadInt(impl_->handle, &regs.Width, 0, &width);
+    if(status != GEVLIB_OK){
+      setErrorString("Unable to get camera width, status: " + QString::number(status));
+      return false;
+    }
+    status = GevRegisterReadInt(impl_->handle, &regs.Height, 0, &height);
+    if(status != GEVLIB_OK){
+      setErrorString("Unable to get camera height, status: " + QString::number(status));
+      return false;
+    }
+    status = GevRegisterReadInt(impl_->handle, &regs.PixelFormat, 0, &format);
+    if(status != GEVLIB_OK){
+      setErrorString("Unable to get camera pixel format, status: " + QString::number(status));
+      return false;
+    }
+
+    impl_->size.setWidth(static_cast<int>(width));
+    impl_->size.setHeight(static_cast<int>(height));
+    impl_->format = dalsaFormatToQImage(static_cast<int>(format));
+
+    //TODO ask why it required to properly image grabbing
     status = GevInitGenICamXMLFeatures(impl_->handle, TRUE);
     if (status != GEVLIB_OK) {
       setErrorString("Unable to init xml features, status: " +
@@ -61,44 +96,10 @@ SaperaResource::SaperaResource(const QString &res, QObject *parent)
       return false;
     }
 
-    GenApi::CNodeMapRef *camera =
-        static_cast<GenApi::CNodeMapRef *>(GevGetFeatureNodeMap(impl_->handle));
-    if (!camera) {
-      setErrorString("Unable to get camera's features");
-      return false;
-    }
-
-    GEV_CAMERA_OPTIONS camOptions{};
-    GevGetCameraInterfaceOptions(impl_->handle, &camOptions);
-    camOptions.heartbeat_timeout_ms = 90000;
-//    camOptions.streamFrame_timeout_ms = 1001;
-//    camOptions.streamNumFramesBuffered = 4;
-//    camOptions.streamMemoryLimitMax = 64 * 1024 * 1024;
-//    camOptions.streamPktSize = 9180;
-//    camOptions.streamPktDelay = 10;
-//    int numCpus = _GetNumCpus();
-//    if (numCpus > 1) {
-//      camOptions.streamThreadAffinity = numCpus - 1;
-//      camOptions.serverThreadAffinity = numCpus - 2;
-//    }
-    GevSetCameraInterfaceOptions(impl_->handle, &camOptions);
-
-    try {
-      GenApi::CIntegerPtr ptrIntNode = camera->_GetNode("Width");
-      impl_->size.setWidth(static_cast<int>(ptrIntNode->GetValue()));
-      ptrIntNode = camera->_GetNode("Height");
-      impl_->size.setHeight(static_cast<int>(ptrIntNode->GetValue()));
-      GenApi::CEnumerationPtr ptrEnumNode = camera->_GetNode("PixelFormat");
-      impl_->format =
-          dalsaFormatToQImage(static_cast<int>(ptrEnumNode->GetIntValue()));
-    }
-    CATCH_GENAPI_ERROR(status);
-
-    if (status != GEVLIB_OK) {
-      setErrorString("Unable to get camera's features, status: " +
-                     QString::number(status));
-      return false;
-    }
+//    GEV_CAMERA_OPTIONS camOptions{};
+//    GevGetCameraInterfaceOptions(impl_->handle, &camOptions);
+//    camOptions.heartbeat_timeout_ms = 90000;
+//    GevSetCameraInterfaceOptions(impl_->handle, &camOptions);
 
     return true;
   });

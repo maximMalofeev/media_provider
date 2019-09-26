@@ -19,13 +19,14 @@ struct SaperaProvider::Implementation {
 };
 
 SaperaProvider::SaperaProvider(QObject *parent) : Provider(parent) {
-  GEVLIB_CONFIG_OPTIONS options{};
-  GevGetLibraryConfigOptions(&options);
-  options.logLevel = GEV_LOG_LEVEL_DEBUG;
-  GevSetLibraryConfigOptions(&options);
-
   impl_.reset(new Implementation);
   Provider::setOrigin(ORIGIN);
+
+  if(GevApiInitialize() != GEVLIB_OK){
+    setState(Invalid);
+    setErrorString("Unable to initialise GevApi");
+    return;
+  }
 
   connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished, [this](){
     if(!impl_->availableCamerasWatcher.result()){
