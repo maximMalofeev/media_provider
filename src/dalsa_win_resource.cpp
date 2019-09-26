@@ -2,8 +2,8 @@
 #include <SapClassBasic.h>
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
-#include "sapera_win_shortcuts.h"
-#include "sapera_win_stream.h"
+#include "dalsa_win_shortcuts.h"
+#include "dalsa_win_stream.h"
 
 namespace MediaProvider {
 
@@ -17,19 +17,19 @@ static QImage::Format sapFormatToQImageFormat(const char *sapFormat) {
   }
 }
 
-struct SaperaResource::Implementation {
+struct DalsaResource::Implementation {
   QSize size;
   QImage::Format format{QImage::Format_Invalid};
   QList<QVariant> availableColorFormats;
-  SaperaStream *stream{};
+  DalsaStream *stream{};
   QFutureWatcher<bool> initWatcher;
 };
 
-SaperaResource::SaperaResource(const QString &res, QObject *parent)
+DalsaResource::DalsaResource(const QString &res, QObject *parent)
     : Resource(parent) {
   impl_.reset(new Implementation);
   setResource(res);
-  impl_->stream = new SaperaStream{res, this};
+  impl_->stream = new DalsaStream{res, this};
 
   connect(&impl_->initWatcher, &QFutureWatcher<bool>::finished, [this]() {
     if (impl_->initWatcher.result() && impl_->stream->initialise()) {
@@ -125,9 +125,9 @@ SaperaResource::SaperaResource(const QString &res, QObject *parent)
   impl_->initWatcher.setFuture(future);
 }
 
-SaperaResource::~SaperaResource() {}
+DalsaResource::~DalsaResource() {}
 
-QSize SaperaResource::size() const {
+QSize DalsaResource::size() const {
   if (state() == Initialised) {
     return impl_->size;
   }
@@ -135,28 +135,28 @@ QSize SaperaResource::size() const {
 }
 
 // TODO set size to sap device
-bool SaperaResource::setSize(const QSize &size) {
+bool DalsaResource::setSize(const QSize &size) {
   if (state() == Initialised && impl_->size == size) {
     return true;
   }
   return false;
 }
 
-QList<QVariant> SaperaResource::availableSizes() const {
+QList<QVariant> DalsaResource::availableSizes() const {
   if (state() == Initialised) {
     return {impl_->size};
   }
   return {};
 }
 
-QList<QVariant> SaperaResource::availableColorFormats() const {
+QList<QVariant> DalsaResource::availableColorFormats() const {
   if (state() == Initialised) {
     return impl_->availableColorFormats;
   }
   return {};
 }
 
-QImage::Format SaperaResource::colorFormat() const {
+QImage::Format DalsaResource::colorFormat() const {
   if (state() == Initialised) {
     return impl_->format;
   }
@@ -164,7 +164,7 @@ QImage::Format SaperaResource::colorFormat() const {
 }
 
 // TODO set format to sap device
-bool SaperaResource::setColorFormat(const QImage::Format format) {
+bool DalsaResource::setColorFormat(const QImage::Format format) {
   if (state() == Initialised && impl_->availableColorFormats.contains(format)) {
     impl_->format = format;
     emit colorFormatChanged();
@@ -174,9 +174,9 @@ bool SaperaResource::setColorFormat(const QImage::Format format) {
   return false;
 }
 
-Stream *SaperaResource::stream() { return impl_->stream; }
+Stream *DalsaResource::stream() { return impl_->stream; }
 
-void SaperaResource::onServerDisconnected(const QString &serverName) {
+void DalsaResource::onServerDisconnected(const QString &serverName) {
   if (serverName == resource()) {
     setState(Invalid);
     setErrorString("Server disconnected");

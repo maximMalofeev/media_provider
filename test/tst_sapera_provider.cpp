@@ -28,11 +28,11 @@ TestSaperaProvider::~TestSaperaProvider() {
 }
 
 void TestSaperaProvider::test_checkIfDefaultOriginIsSaperaServer() {
-  QCOMPARE(provider_->origin(), "sapera_server");
+  QCOMPARE(provider_->origin(), "dalsa_server");
 }
 
 void TestSaperaProvider::test_setOrigin() {
-  QString newOrigin = "sapera_server";
+  QString newOrigin = "dalsa_server";
   QVERIFY(provider_->setOrigin(newOrigin));
   QCOMPARE(newOrigin, provider_->origin());
 }
@@ -44,7 +44,7 @@ void TestSaperaProvider::test_setUnexistsOrigin() {
 
 void TestSaperaProvider::test_setEmptyOrigin() {
   QVERIFY(provider_->setOrigin(""));
-  QCOMPARE(provider_->origin(), "sapera_server");
+  QCOMPARE(provider_->origin(), "dalsa_server");
 }
 
 QTEST_MAIN(TestSaperaProvider)

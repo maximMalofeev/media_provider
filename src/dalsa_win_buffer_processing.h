@@ -7,11 +7,11 @@
 
 namespace MediaProvider {
 
-class SapBufferProcessing : public QObject, public SapProcessing {
+class DalsaBufferProcessing : public QObject, public SapProcessing {
   Q_OBJECT
 
  public:
-  SapBufferProcessing(SapBuffer* sapBuffer, QObject* parent = nullptr);
+  DalsaBufferProcessing(SapBuffer* sapBuffer, QObject* parent = nullptr);
 
  signals:
   void newFrame(QImage frame, qlonglong timestamp);

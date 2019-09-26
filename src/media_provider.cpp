@@ -151,8 +151,8 @@ Provider *Provider::createProvider(const QString &providerName,
     return new VideoProvider(parent);
   } else if (providerName == "RtspProvider") {
     return new RtspProvider(parent);
-  } else if (providerName == "SaperaProvider") {
-    return new SaperaProvider(parent);
+  } else if (providerName == "DalsaProvider") {
+    return new DalsaProvider(parent);
   } else {
     return {};
   }
@@ -160,7 +160,7 @@ Provider *Provider::createProvider(const QString &providerName,
 
 QStringList Provider::availableProviders() {
   return QStringList{"ImageProvider", "VideoProvider", "RtspProvider",
-                     "SaperaProvider"};
+                     "DalsaProvider"};
 }
 
 }  // namespace MediaProvider

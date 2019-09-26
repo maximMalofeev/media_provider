@@ -8,10 +8,10 @@ class SapXferCallbackInfo;
 
 namespace MediaProvider {
 
-class SaperaStream : public Stream {
+class DalsaStream : public Stream {
  public:
-  SaperaStream(const QString& resource, Resource* parent);
-  ~SaperaStream();
+  DalsaStream(const QString& resource, Resource* parent);
+  ~DalsaStream();
 
   bool initialise();
   SapAcqDevice* sapDevice();

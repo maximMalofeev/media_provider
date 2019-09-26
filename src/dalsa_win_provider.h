@@ -7,12 +7,12 @@ class SapManCallbackInfo;
 
 namespace MediaProvider {
 
-class SaperaProvider : public Provider {
+class DalsaProvider : public Provider {
   Q_OBJECT
 
  public:
-  SaperaProvider(QObject* parent = nullptr);
-  ~SaperaProvider();
+  DalsaProvider(QObject* parent = nullptr);
+  ~DalsaProvider();
 
   bool setOrigin(const QString &orig) override;
   Resource *createResource(const QString &resource) override;

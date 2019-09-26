@@ -8,7 +8,7 @@
 
 namespace MediaProvider {
 
-const QString DEFAULT_ORIGIN = "sapera_server";
+const QString DEFAULT_ORIGIN = "dalsa_server";
 
 // Check if able to create server and vendor is Dalsa
 static bool isServerAppropriate(const int serverIndex) {
@@ -38,11 +38,11 @@ static bool isServerAppropriate(const int serverIndex) {
   }
 }
 
-struct SaperaProvider::Implementation {
+struct DalsaProvider::Implementation {
   QFutureWatcher<QStringList> resourcesWartcher;
 };
 
-SaperaProvider::SaperaProvider(QObject *parent) {
+DalsaProvider::DalsaProvider(QObject *parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(DEFAULT_ORIGIN);
 
@@ -87,13 +87,13 @@ SaperaProvider::SaperaProvider(QObject *parent) {
   impl_->resourcesWartcher.setFuture(resourcesFuture);
 }
 
-SaperaProvider::~SaperaProvider() {
+DalsaProvider::~DalsaProvider() {
   if (!SapManager::UnregisterServerCallback()) {
     qWarning() << "Unable to unregister server callback";
   }
 }
 
-bool SaperaProvider::setOrigin(const QString &orig) {
+bool DalsaProvider::setOrigin(const QString &orig) {
   if (origin() == orig || orig == "") {
     return true;
   }
@@ -102,10 +102,10 @@ bool SaperaProvider::setOrigin(const QString &orig) {
   return false;
 }
 
-Resource *SaperaProvider::createResource(const QString &resource) {
+Resource *DalsaProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    auto res = new SaperaResource{resource};
-    connect(this, &SaperaProvider::serverDisconnected, res, &SaperaResource::onServerDisconnected);
+    auto res = new DalsaResource{resource};
+    connect(this, &DalsaProvider::serverDisconnected, res, &DalsaResource::onServerDisconnected);
     return res;
   }
   setErrorString(
@@ -113,7 +113,7 @@ Resource *SaperaProvider::createResource(const QString &resource) {
   return {};
 }
 
-void SaperaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
+void DalsaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
   const auto serverIndex = callbackInfo->GetServerIndex();
   char serverName[CORSERVER_MAX_STRLEN]{0};
   if (!SapManager::GetServerName(serverIndex, serverName)) {
@@ -121,7 +121,7 @@ void SaperaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
     return;
   }
 
-  auto provider = static_cast<SaperaProvider *>(callbackInfo->GetContext());
+  auto provider = static_cast<DalsaProvider *>(callbackInfo->GetContext());
   if (!provider) {
     qWarning() << "Unable to cast provider";
     return;

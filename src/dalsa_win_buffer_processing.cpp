@@ -3,14 +3,14 @@
 
 namespace MediaProvider {
 
-SapBufferProcessing::SapBufferProcessing(SapBuffer* sapBuffer, QObject* parent)
+DalsaBufferProcessing::DalsaBufferProcessing(SapBuffer* sapBuffer, QObject* parent)
     : SapProcessing(sapBuffer), QObject(parent) {
   SetAutoEmpty(true);
   auto bytesPerPixel = sapBuffer->GetBytesPerPixel();
   frameSize = sapBuffer->GetWidth() * sapBuffer->GetHeight() * bytesPerPixel;
 }
 
-BOOL SapBufferProcessing::Run() {
+BOOL DalsaBufferProcessing::Run() {
   auto buf = GetBuffer();
   UINT64 timestamp{};
 

@@ -6,22 +6,22 @@
 
 namespace MediaProvider {
 
-struct SaperaStream::Implementation {
+struct DalsaStream::Implementation {
   QScopedPointer<SapAcqDevice> sapDevice;
   QScopedPointer<SapBufferWithTrash> sapBufWithTrash;
   QScopedPointer<SapAcqDeviceToBuf> sapAcqDeviceToBuffer;
-  SapBufferProcessing *sapBufferProcessing{};
-  SapBufferProcessing *bufferProcessing{};
+  DalsaBufferProcessing *sapBufferProcessing{};
+  DalsaBufferProcessing *bufferProcessing{};
 };
 
-SaperaStream::SaperaStream(const QString &resource, Resource *parent)
+DalsaStream::DalsaStream(const QString &resource, Resource *parent)
     : Stream(parent) {
   impl_.reset(new Implementation);
   impl_->sapDevice.reset(
       new SapAcqDevice{SapLocation{resource.toStdString().c_str()}});
 }
 
-SaperaStream::~SaperaStream() {
+DalsaStream::~DalsaStream() {
   stop();
   if (impl_->sapAcqDeviceToBuffer) {
     impl_->sapAcqDeviceToBuffer->Destroy();
@@ -31,7 +31,7 @@ SaperaStream::~SaperaStream() {
   }
 }
 
-bool SaperaStream::initialise() {
+bool DalsaStream::initialise() {
   impl_->sapBufWithTrash.reset(
       new SapBufferWithTrash{4, impl_->sapDevice.get()});
   if (!impl_->sapBufWithTrash->Create()) {
@@ -42,7 +42,7 @@ bool SaperaStream::initialise() {
   }
 
   impl_->sapBufferProcessing =
-      new SapBufferProcessing(impl_->sapBufWithTrash.get(), this);
+      new DalsaBufferProcessing(impl_->sapBufWithTrash.get(), this);
   if (!impl_->sapBufferProcessing->Create()) {
     setState(Invalid);
     setErrorString(QString{"Unable to create SapBufferProcessing, reason: "} +
@@ -61,24 +61,24 @@ bool SaperaStream::initialise() {
   // TODO figure out why i do SetAutoEmpty(false)
   impl_->sapAcqDeviceToBuffer->SetAutoEmpty(false);
 
-  QObject::connect(impl_->sapBufferProcessing, &SapBufferProcessing::newFrame,
-                   this, &SaperaStream::newFrame);
+  QObject::connect(impl_->sapBufferProcessing, &DalsaBufferProcessing::newFrame,
+                   this, &DalsaStream::newFrame);
   return true;
 }
 
-SapAcqDevice *SaperaStream::sapDevice() { return impl_->sapDevice.get(); }
+SapAcqDevice *DalsaStream::sapDevice() { return impl_->sapDevice.get(); }
 
-void SaperaStream::XferCallback(SapXferCallbackInfo *pInfo) {
+void DalsaStream::XferCallback(SapXferCallbackInfo *pInfo) {
   if (pInfo->GetEventType() != SapXferPair::EventEndOfFrame) {
     return;
   }
 
   auto sapBufProcessing_ =
-      static_cast<SapBufferProcessing *>(pInfo->GetContext());
+      static_cast<DalsaBufferProcessing *>(pInfo->GetContext());
   sapBufProcessing_->Execute();
 }
 
-void SaperaStream::start() {
+void DalsaStream::start() {
   if(resource()->state() != Resource::Initialised){
     return;
   }
@@ -93,7 +93,7 @@ void SaperaStream::start() {
   setState(Playing);
 }
 
-void SaperaStream::stop() {
+void DalsaStream::stop() {
   if (auto s = state(); s == Invalid || s == Stopped) {
     return;
   }
