@@ -5,10 +5,10 @@
 
 namespace MediaProvider {
 
-class SaperaResource : public Resource {
+class DalsaResource : public Resource {
  public:
-  SaperaResource(const QString& res, QObject* parent = nullptr);
-  ~SaperaResource();
+  DalsaResource(const QString& res, QObject* parent = nullptr);
+  ~DalsaResource();
 
   QSize size() const;
   bool setSize(const QSize& size);

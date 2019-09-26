@@ -5,12 +5,12 @@
 
 namespace MediaProvider {
 
-class SaperaStream : public Stream {
+class DalsaStream : public Stream {
   Q_OBJECT
 
  public:
-  SaperaStream(Resource* parent);
-  ~SaperaStream();
+  DalsaStream(Resource* parent);
+  ~DalsaStream();
 
   void setCameraHandle(void* handle);
 

@@ -6,12 +6,12 @@
 
 namespace MediaProvider {
 
-class SapBufferProcessing : public QThread {
+class DalsaBufferProcessing : public QThread {
   Q_OBJECT
 
  public:
-  SapBufferProcessing(void* gevCameraHandle, QObject* parent);
-  ~SapBufferProcessing();
+  DalsaBufferProcessing(void* gevCameraHandle, QObject* parent);
+  ~DalsaBufferProcessing();
 
   bool isInitialised() const;
   void stop();

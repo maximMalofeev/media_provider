@@ -1,46 +1,44 @@
-#include "sapera_lnx_stream.h"
+#include "dalsa_lnx_stream.h"
 #include <GenApi/GenApi.h>
 #include <gevapi.h>
-#include "sapera_lnx_buffer_processing.h"
 #include <QDebug>
+#include "dalsa_lnx_buffer_processing.h"
 
 namespace MediaProvider {
 
-struct SaperaStream::Implementation {
-  SapBufferProcessing* sapBufProcessing{};
+struct DalsaStream::Implementation {
+  DalsaBufferProcessing* sapBufProcessing{};
   GEV_CAMERA_HANDLE handle{};
 };
 
-SaperaStream::SaperaStream(Resource* parent)
-    : Stream(parent) {
+DalsaStream::DalsaStream(Resource* parent) : Stream(parent) {
   impl_.reset(new Implementation);
 }
 
-SaperaStream::~SaperaStream() {
-  qDebug() << "SaperaStream::~SaperaStream()";
+DalsaStream::~DalsaStream() {
+  qDebug() << "DalsaStream::~DalsaStream()";
   stop();
 }
 
-void SaperaStream::setCameraHandle(void *handle)
-{
+void DalsaStream::setCameraHandle(void* handle) {
   impl_->handle = handle;
-  impl_->sapBufProcessing = new SapBufferProcessing{impl_->handle, this};
-  if(!impl_->sapBufProcessing->isInitialised()){
+  impl_->sapBufProcessing = new DalsaBufferProcessing{impl_->handle, this};
+  if (!impl_->sapBufProcessing->isInitialised()) {
     setState(Invalid);
     setErrorString("Unable to initialise buffer processing");
     return;
   }
-  connect(impl_->sapBufProcessing, &SapBufferProcessing::newFrame, this,
-          &SaperaStream::newFrame);
-  connect(impl_->sapBufProcessing, &SapBufferProcessing::error, this,
-          &SaperaStream::onBufferProcessingError);
+  connect(impl_->sapBufProcessing, &DalsaBufferProcessing::newFrame, this,
+          &DalsaStream::newFrame);
+  connect(impl_->sapBufProcessing, &DalsaBufferProcessing::error, this,
+          &DalsaStream::onBufferProcessingError);
 }
 
-void SaperaStream::start() {
-  if(resource()->state() != Resource::Initialised){
+void DalsaStream::start() {
+  if (resource()->state() != Resource::Initialised) {
     return;
   }
-  if(state() == Playing){
+  if (state() == Playing) {
     return;
   }
   if (impl_->handle) {
@@ -54,8 +52,8 @@ void SaperaStream::start() {
   }
 }
 
-void SaperaStream::stop() {
-  if(impl_->handle && impl_->sapBufProcessing->isRunning()){
+void DalsaStream::stop() {
+  if (impl_->handle && impl_->sapBufProcessing->isRunning()) {
     impl_->sapBufProcessing->stop();
     impl_->sapBufProcessing->wait();
     GevStopImageTransfer(impl_->handle);
@@ -65,7 +63,7 @@ void SaperaStream::stop() {
   }
 }
 
-void SaperaStream::onBufferProcessingError(QString errorStr) {
+void DalsaStream::onBufferProcessingError(QString errorStr) {
   impl_->sapBufProcessing->stop();
   setErrorString(errorStr);
   setState(Invalid);

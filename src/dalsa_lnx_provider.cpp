@@ -1,9 +1,9 @@
-#include "sapera_lnx_provider.h"
+#include "dalsa_lnx_provider.h"
 #include <GenApi/GenApi.h>
 #include <gevapi.h>
-#include "sapera_lnx_resource.h"
-#include <QtConcurrent/QtConcurrent>
 #include <QDebug>
+#include <QtConcurrent/QtConcurrent>
+#include "dalsa_lnx_resource.h"
 
 namespace MediaProvider {
 
@@ -14,34 +14,34 @@ constexpr int MAX_CAMERAS = MAX_NETIF * MAX_CAMERAS_PER_NETIF;
 const QString ORIGIN = "GIGE-V";
 const QString DALSA_MANUFACTURE = "Teledyne DALSA";
 
-struct SaperaProvider::Implementation {
+struct DalsaProvider::Implementation {
   QFutureWatcher<bool> availableCamerasWatcher;
 };
 
-SaperaProvider::SaperaProvider(QObject *parent) : Provider(parent) {
+DalsaProvider::DalsaProvider(QObject *parent) : Provider(parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(ORIGIN);
 
-  if(GevApiInitialize() != GEVLIB_OK){
+  if (GevApiInitialize() != GEVLIB_OK) {
     setState(Invalid);
     setErrorString("Unable to initialise GevApi");
     return;
   }
 
-  connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished, [this](){
-    if(!impl_->availableCamerasWatcher.result()){
-      setState(Invalid);
-      return;
-    }
-    setState(Initialised);
-  });
+  connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished,
+          [this]() {
+            if (!impl_->availableCamerasWatcher.result()) {
+              setState(Invalid);
+              return;
+            }
+            setState(Initialised);
+          });
 
-  auto availableCamerasFuture = QtConcurrent::run([this](){
+  auto availableCamerasFuture = QtConcurrent::run([this]() {
     GEV_DEVICE_INTERFACE pCamera[MAX_CAMERAS]{};
     int numCamera{0};
 
-    if (GevGetCameraList(pCamera, MAX_CAMERAS, &numCamera) !=
-        GEVLIB_OK) {
+    if (GevGetCameraList(pCamera, MAX_CAMERAS, &numCamera) != GEVLIB_OK) {
       setErrorString("Unable to get camera lists");
       return false;
     }
@@ -60,12 +60,12 @@ SaperaProvider::SaperaProvider(QObject *parent) : Provider(parent) {
   impl_->availableCamerasWatcher.setFuture(availableCamerasFuture);
 }
 
-SaperaProvider::~SaperaProvider() {
+DalsaProvider::~DalsaProvider() {
   GevApiUninitialize();
-  qDebug() << "SaperaProvider::~SaperaProvider()";
+  qDebug() << "DalsaProvider::~DalsaProvider()";
 }
 
-bool SaperaProvider::setOrigin(const QString &orig) {
+bool DalsaProvider::setOrigin(const QString &orig) {
   if (orig == ORIGIN || orig == "") {
     return true;
   }
@@ -73,9 +73,9 @@ bool SaperaProvider::setOrigin(const QString &orig) {
   return false;
 }
 
-Resource *SaperaProvider::createResource(const QString &resource) {
-  if(availableResources().contains(resource)){
-    return new SaperaResource(resource);
+Resource *DalsaProvider::createResource(const QString &resource) {
+  if (availableResources().contains(resource)) {
+    return new DalsaResource(resource);
   }
   setErrorString("There is no requested resource");
   return {};

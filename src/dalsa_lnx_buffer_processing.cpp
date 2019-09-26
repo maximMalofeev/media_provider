@@ -1,4 +1,4 @@
-#include "sapera_lnx_buffer_processing.h"
+#include "dalsa_lnx_buffer_processing.h"
 #include <GenApi/GenApi.h>
 #include <gevapi.h>
 #include <QDebug>
@@ -29,14 +29,15 @@ static unsigned long us_timer_init(void) {
 
 constexpr int NUM_BUFFERS = 8;
 
-struct SapBufferProcessing::Implementation {
+struct DalsaBufferProcessing::Implementation {
   GEV_CAMERA_HANDLE handle{};
   PUINT8 buffers[NUM_BUFFERS]{};
   bool initialised{false};
   bool stopped{false};
 };
 
-SapBufferProcessing::SapBufferProcessing(void* gevCameraHandle, QObject* parent)
+DalsaBufferProcessing::DalsaBufferProcessing(void* gevCameraHandle,
+                                             QObject* parent)
     : QThread(parent) {
   impl_.reset(new Implementation{gevCameraHandle});
 
@@ -64,8 +65,8 @@ SapBufferProcessing::SapBufferProcessing(void* gevCameraHandle, QObject* parent)
   impl_->initialised = true;
 }
 
-SapBufferProcessing::~SapBufferProcessing() {
-  qDebug() << "SapBufferProcessing::~SapBufferProcessing()";
+DalsaBufferProcessing::~DalsaBufferProcessing() {
+  qDebug() << "DalsaBufferProcessing::~DalsaBufferProcessing()";
   stop();
   GevFreeImageTransfer(impl_->handle);
   for (int i = 0; i < NUM_BUFFERS; i++) {
@@ -73,16 +74,16 @@ SapBufferProcessing::~SapBufferProcessing() {
   }
 }
 
-bool SapBufferProcessing::isInitialised() const { return impl_->initialised; }
+bool DalsaBufferProcessing::isInitialised() const { return impl_->initialised; }
 
-void SapBufferProcessing::stop() {
+void DalsaBufferProcessing::stop() {
   if (isRunning()) {
     impl_->stopped = true;
   }
 }
 
-void SapBufferProcessing::run() {
-  qDebug() << "SapBufferProcessing started";
+void DalsaBufferProcessing::run() {
+  qDebug() << "DalsaBufferProcessing started";
 
   auto cameraInfo = GevGetCameraInfo(impl_->handle);
 
@@ -96,7 +97,7 @@ void SapBufferProcessing::run() {
                                 &numFree, &numTrashed, &mode);
 
     status = GevWaitForNextImage(impl_->handle, &img, 1000);
-    if(status == GEVLIB_OK){
+    if (status == GEVLIB_OK) {
       if (img != nullptr) {
         if (img->status == GEV_FRAME_STATUS_RECVD) {
           QImage::Format format{};
@@ -122,22 +123,22 @@ void SapBufferProcessing::run() {
                         frame};
           emit newFrame(newImg, -1);
         }
-      }else{
+      } else {
         qDebug() << "GEV_BUFFER_OBJECT is nullptr";
       }
-    }
-    else{
+    } else {
       qDebug() << "GevWaitForNextImage failed with status:" << status;
-      if(status == static_cast<unsigned short>(GEVLIB_ERROR_TIME_OUT)){
+      if (status == static_cast<unsigned short>(GEVLIB_ERROR_TIME_OUT)) {
         emit error("Wait for next image timed out");
-      }else{
-        emit error("Wait for next image failed with status: " + QString::number(status));
+      } else {
+        emit error("Wait for next image failed with status: " +
+                   QString::number(status));
       }
       break;
     }
   }
 
-  qDebug() << "SapBufferProcessing finished";
+  qDebug() << "DalsaBufferProcessing finished";
 }
 
 }  // namespace MediaProvider

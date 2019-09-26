@@ -7,7 +7,7 @@
 #ifdef WIN32
 #include "dalsa_win_provider.h"
 #elif unix
-#include "sapera_lnx_provider.h"
+#include "dalsa_lnx_provider.h"
 #endif
 
 namespace MediaProvider {

@@ -5,10 +5,10 @@
 
 namespace MediaProvider {
 
-class SaperaProvider : public Provider {
+class DalsaProvider : public Provider {
  public:
-  SaperaProvider(QObject *parent = nullptr);
-  ~SaperaProvider();
+  DalsaProvider(QObject *parent = nullptr);
+  ~DalsaProvider();
 
   bool setOrigin(const QString &orig);
   Resource *createResource(const QString &resource);
