@@ -7,6 +7,8 @@ namespace MediaProvider {
 
 const QString DEFAULT_ORIGIN = "rtsp_provider.ini";
 
+const QString RtspProvider::PROVIDER_NAME = "RTSP_PROVIDER";
+
 struct RtspProvider::Implementation {
   QStringList fetchAvailableResources(const QString &origin) {
     QStringList availableResources;
@@ -31,6 +33,8 @@ RtspProvider::RtspProvider(QObject *parent) : Provider(parent) {
 }
 
 RtspProvider::~RtspProvider() {}
+
+QString RtspProvider::provider() const { return PROVIDER_NAME; }
 
 bool RtspProvider::setOrigin(const QString &orig) {
   if (orig == "") {

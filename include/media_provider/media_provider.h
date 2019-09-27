@@ -169,6 +169,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
 
 class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
   Q_OBJECT
+  Q_PROPERTY(QString provider READ provider CONSTANT)
   Q_PROPERTY(State state READ state NOTIFY stateChanged)
   Q_PROPERTY(QString origin READ origin WRITE setOrigin NOTIFY originChanged)
   Q_PROPERTY(QStringList availableResources READ availableResources NOTIFY
@@ -185,6 +186,11 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
   Q_ENUM(State)
 
   ~Provider();
+  /**
+   * @brief provider name
+   * @return provider name
+   */
+  virtual QString provider() const = 0;
   /**
    * @brief current provider state
    * @return current state

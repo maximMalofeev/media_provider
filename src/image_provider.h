@@ -10,7 +10,10 @@ class ImageProvider : public FileBasedProvider {
   ImageProvider(QObject* parent = nullptr);
   ~ImageProvider();
 
+  QString provider() const override;
   Resource *createResource(const QString &resource) override;
+
+  static const QString PROVIDER_NAME;
 
  private:
   struct Implementation;

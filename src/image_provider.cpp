@@ -4,6 +4,8 @@
 
 namespace MediaProvider {
 
+const QString ImageProvider::PROVIDER_NAME = "IMAGE_PROVIDER";
+
 struct ImageProvider::Implementation {};
 
 ImageProvider::ImageProvider(QObject *parent)
@@ -12,6 +14,8 @@ ImageProvider::ImageProvider(QObject *parent)
 }
 
 ImageProvider::~ImageProvider() = default;
+
+QString MediaProvider::ImageProvider::provider() const { return PROVIDER_NAME; }
 
 Resource *ImageProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {

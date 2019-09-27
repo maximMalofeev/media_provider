@@ -10,8 +10,11 @@ class DalsaProvider : public Provider {
   DalsaProvider(QObject *parent = nullptr);
   ~DalsaProvider();
 
+  QString provider() const override;
   bool setOrigin(const QString &orig);
   Resource *createResource(const QString &resource);
+
+  static const QString PROVIDER_NAME;
 
  private:
   struct Implementation;

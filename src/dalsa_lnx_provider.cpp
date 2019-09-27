@@ -14,6 +14,8 @@ constexpr int MAX_CAMERAS = MAX_NETIF * MAX_CAMERAS_PER_NETIF;
 const QString ORIGIN = "GIGE-V";
 const QString DALSA_MANUFACTURE = "Teledyne DALSA";
 
+const QString DalsaProvider::PROVIDER_NAME = "DALSA_PROVIDER";
+
 struct DalsaProvider::Implementation {
   QFutureWatcher<bool> availableCamerasWatcher;
 };
@@ -64,6 +66,8 @@ DalsaProvider::~DalsaProvider() {
   GevApiUninitialize();
   qDebug() << "DalsaProvider::~DalsaProvider()";
 }
+
+QString DalsaProvider::provider() const { return PROVIDER_NAME; }
 
 bool DalsaProvider::setOrigin(const QString &orig) {
   if (orig == ORIGIN || orig == "") {

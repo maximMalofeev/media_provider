@@ -14,10 +14,14 @@ class DalsaProvider : public Provider {
   DalsaProvider(QObject* parent = nullptr);
   ~DalsaProvider();
 
+  QString provider() const override;
+
   bool setOrigin(const QString &orig) override;
   Resource *createResource(const QString &resource) override;
 
   static void onServerEvent(SapManCallbackInfo *callbackInfo);
+
+  static const QString PROVIDER_NAME;
 
  signals:
   void serverDisconnected(QString serverName);

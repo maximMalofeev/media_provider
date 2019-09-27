@@ -38,6 +38,8 @@ static bool isServerAppropriate(const int serverIndex) {
   }
 }
 
+const QString DalsaProvider::PROVIDER_NAME = "DALSA_PROVIDER";
+
 struct DalsaProvider::Implementation {
   QFutureWatcher<QStringList> resourcesWartcher;
 };
@@ -92,6 +94,8 @@ DalsaProvider::~DalsaProvider() {
     qWarning() << "Unable to unregister server callback";
   }
 }
+
+QString DalsaProvider::provider() const { return PROVIDER_NAME; }
 
 bool DalsaProvider::setOrigin(const QString &orig) {
   if (origin() == orig || orig == "") {

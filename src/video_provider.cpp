@@ -4,6 +4,8 @@
 
 namespace MediaProvider {
 
+const QString VideoProvider::PROVIDER_NAME = "VIDEO_PROVIDER";
+
 struct VideoProvider::Implementation {};
 
 VideoProvider::VideoProvider(QObject *parent)
@@ -12,6 +14,8 @@ VideoProvider::VideoProvider(QObject *parent)
 }
 
 VideoProvider::~VideoProvider() = default;
+
+QString VideoProvider::provider() const { return PROVIDER_NAME; }
 
 Resource *VideoProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {

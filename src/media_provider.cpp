@@ -145,13 +145,13 @@ QString Provider::errorString() const { return impl_->lastError; }
 
 Provider *Provider::createProvider(const QString &providerName,
                                    QObject *parent) {
-  if (providerName == "ImageProvider") {
+  if (providerName == ImageProvider::PROVIDER_NAME) {
     return new ImageProvider(parent);
-  } else if (providerName == "VideoProvider") {
+  } else if (providerName == VideoProvider::PROVIDER_NAME) {
     return new VideoProvider(parent);
-  } else if (providerName == "RtspProvider") {
+  } else if (providerName == RtspProvider::PROVIDER_NAME) {
     return new RtspProvider(parent);
-  } else if (providerName == "DalsaProvider") {
+  } else if (providerName == DalsaProvider::PROVIDER_NAME) {
     return new DalsaProvider(parent);
   } else {
     return {};
@@ -159,8 +159,8 @@ Provider *Provider::createProvider(const QString &providerName,
 }
 
 QStringList Provider::availableProviders() {
-  return QStringList{"ImageProvider", "VideoProvider", "RtspProvider",
-                     "DalsaProvider"};
+  return QStringList{ImageProvider::PROVIDER_NAME, VideoProvider::PROVIDER_NAME,
+                     RtspProvider::PROVIDER_NAME, DalsaProvider::PROVIDER_NAME};
 }
 
 }  // namespace MediaProvider
