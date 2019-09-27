@@ -9,10 +9,10 @@ Backend::Backend(QObject *parent) : QObject(parent) {}
 Backend::~Backend() {
   qDebug() << "Backend::~Backend()";
   if(resource_){
-    delete resource_;
+    resource_->deleteLater();
   }
   if(provider_){
-    delete provider_;
+    provider_->deleteLater();
   }
 }
 

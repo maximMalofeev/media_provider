@@ -10,6 +10,7 @@ struct VideoStream::Implementation {
 VideoStream::VideoStream(QMediaPlayer *player, Resource *parent)
     : Stream(parent) {
   impl_.reset(new Implementation{player});
+  player->setParent(this);
   connect(impl_->player, &QMediaPlayer::stateChanged,
           [this](QMediaPlayer::State state) {
             if (state == QMediaPlayer::PlayingState) {

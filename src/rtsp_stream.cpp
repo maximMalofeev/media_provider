@@ -7,8 +7,10 @@ struct RtspStream::Implementation {
   QMediaPlayer *player{};
 };
 
-RtspStream::RtspStream(QMediaPlayer *player, Resource *parent) {
+RtspStream::RtspStream(QMediaPlayer *player, Resource *parent)
+    : Stream(parent) {
   impl_.reset(new Implementation{player});
+  player->setParent(this);
   connect(impl_->player, &QMediaPlayer::stateChanged,
           [this](QMediaPlayer::State s) {
             if (state() == Invalid) {
