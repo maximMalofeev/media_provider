@@ -13,8 +13,8 @@ struct VideoResource::Implementation {
 VideoResource::VideoResource(const QString& res, QObject* parent)
     : QMediaPlayerBasedResource(res, parent) {
   impl_.reset(new Implementation);
-  qMediaPlayer()->setMedia(QUrl::fromLocalFile(res));
   impl_->stream = new VideoStream{qMediaPlayer(), this};
+  qMediaPlayer()->setMedia(QUrl::fromLocalFile(res));
   connect(videoSurface(), &VideoSurface::newFrame, impl_->stream, &VideoStream::onNewFrame);
 }
 
