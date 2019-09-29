@@ -61,6 +61,15 @@ ApplicationWindow {
                     PropertyChanges { target: providerOrigin; text: backend.provider.origin }
                     PropertyChanges { target: availableResourcesList; model: backend.provider.availableResources }
                     PropertyChanges { target: videoSettingsBusyIndicator; running: backend.provider.state === Provider.Initialising }
+                    PropertyChanges { target: providerErrorState; when: backend.provider.state === Provider.Invalid }
+                },
+                State{
+                    id: providerErrorState
+                    name: "PROVIDER ERROR"
+                    extend: "HAS PROVIDER"
+                    PropertyChanges { target: providerErrorRow; visible: true }
+                    PropertyChanges { target: providerError; text: backend.provider.errorString }
+                    PropertyChanges { target: availableResourcesList; model: null }
                 },
                 State{
                     name: "HAS RESOURCE"
@@ -73,11 +82,12 @@ ApplicationWindow {
                     PropertyChanges { target: formats; model: backend.resource.availableColorFormats; }
                     PropertyChanges { target: applyVideoSettingsButton; visible: true; }
                     PropertyChanges { target: videoSettingsBusyIndicator; running: backend.resource.state === Resource.Initialising }
+                    PropertyChanges { target: resourceErrorState; when: backend.resource.state === Resource.Invalid }
                 },
                 State{
+                    id: resourceErrorState
                     name: "RESOURCE ERROR"
                     extend: "HAS RESOURCE"
-                    when: backend.resource && backend.resource.state === Resource.Invalid
                     PropertyChanges { target: resourceErrorRow; visible: true }
                     PropertyChanges { target: resourceError; text: backend.resource.errorString }
                     PropertyChanges { target: resourceParametersLayout; visible: false; }
@@ -166,6 +176,20 @@ ApplicationWindow {
                 }
                 Label{
                     id: providerOrigin
+                    width: 300
+                    elide: Text.ElideLeft
+                }
+            }
+            Row{
+                id: providerErrorRow
+                Layout.fillWidth: true
+                visible: false
+                spacing: 5
+                Label{
+                    text: qsTr("Error:")
+                }
+                Label{
+                    id: providerError
                     width: 300
                     elide: Text.ElideLeft
                 }
