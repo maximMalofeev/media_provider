@@ -9,7 +9,6 @@ class QAbstractVideoSurface;
 
 class Backend : public QObject {
   Q_OBJECT
-  Q_PROPERTY(QStringList providers READ providers CONSTANT)
   Q_PROPERTY(
       MediaProvider::Provider* provider MEMBER provider_ NOTIFY providerChanged)
   Q_PROPERTY(
@@ -20,7 +19,9 @@ class Backend : public QObject {
   explicit Backend(QObject* parent = nullptr);
   ~Backend();
 
-  QStringList providers() const;
+  Q_INVOKABLE QStringList availableProviders() const;
+  Q_INVOKABLE void resetProvider();
+  Q_INVOKABLE void applyResource();
 
  signals:
   void providerChanged();

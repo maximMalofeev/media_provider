@@ -1,260 +1,299 @@
-import QtQuick 2.12
+import QtQuick 2.13
 import QtQuick.Controls 2.13
-import QtQuick.Layouts 1.12
+import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
 import MediaProvider 1.0
 
 ApplicationWindow {
+    id: root
+    minimumWidth: 680
+    width: 680
+    height: 570
+    minimumHeight: 570
+    flags: Qt.Window
+    title: qsTr("Media Player")
     visible: true
-    width: 800
-    height: 600
 
-    SplitView{
-        anchors.fill: parent
-        anchors.margins: 4
-        anchors.bottomMargin: footer.height
-
-        Rectangle{
-            SplitView.preferredWidth: 230
-            SplitView.fillHeight: true
-            ColumnLayout{
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                Frame{
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 150
-                    padding: 0
-                    ScrollView{
-                        anchors.fill: parent
-                        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
-                        ListView{
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            model: backend.providers
-                            clip: true
-                            header: Label{
-                                width: parent.width
-                                text: "Providers:"
-                                font.pixelSize: 15
-                                horizontalAlignment: Qt.AlignHCenter
-                            }
-                            delegate: Button {
-                                width: parent.width
-                                text: modelData
-                                onClicked: {
-                                    backend.createProvider(modelData)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Frame{
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 150
-                    visible: backend.provider ? true : false
-                    padding: 0
-                    ScrollView{
-                        anchors.fill: parent
-                        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
-                        ListView{
-                            id: availableResources
-                            property Provider provider: backend.provider
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            model: provider ? provider.availableResources : null
-                            clip: true
-                            header: Label{
-                                width: parent.width
-                                text: backend.provider ? backend.provider.origin : ""
-                                font.pixelSize: 15
-                                horizontalAlignment: Qt.AlignHCenter
-                                Rectangle{
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 4
-                                    radius: 10
-                                    color: backend.provider.state === Provider.Initialising ? "blue" : backend.provider.state === Provider.Initialised ? "green" : "red"
-                                    width: parent.height - 2
-                                    height: parent.height - 2
-                                    ToolTip.text: backend.provider.errorString
-                                    MouseArea{
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onHoveredChanged: {
-                                           if(containsMouse && backend.provider.errorString.length) {
-                                               parent.ToolTip.visible = true
-                                           }
-                                        }
-                                    }
-                                }
-                            }
-                            delegate: Button {
-                                width: parent.width
-                                text: modelData
-                                onClicked: {
-                                    backend.createResource(modelData)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Frame{
-                    id: res
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 130
-                    visible: backend.resource ? true : false
-                    padding: 2
-
-                    GridLayout{
-                        id: resGrid
-                        anchors.fill: parent
-                        anchors.margins: 2
-                        columns: 2
-
-                        Label{
-                            text: "Resource"
-                            font.pixelSize: 14
-                        }
-                        Label{
-                            Layout.fillWidth: true
-                            text: backend.resource ? backend.resource.resource : ""
-                            font.pixelSize: 14
-                            horizontalAlignment: Qt.AlignLeft
-                            elide: Text.ElideRight
-                            MouseArea{
-                                id: resLabelMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                            }
-                            Rectangle{
-                                anchors.right: parent.right
-                                anchors.rightMargin: 4
-                                radius: 10
-                                color: backend.resource.state === Resource.Initialising ? "blue" : backend.resource.state === Resource.Initialised ? "green" : "red"
-                                width: parent.height - 2
-                                height: parent.height - 2
-                                ToolTip.text: backend.resource.errorString
-                                MouseArea{
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    onHoveredChanged: {
-                                       if(containsMouse && backend.resource.errorString.length) {
-                                           parent.ToolTip.visible = true
-                                       }
-                                    }
-                                }
-                            }
-                        }
-                        Label{
-                            text: "Resolution"
-                            font.pixelSize: 14
-                        }
-                        ComboBox{
-                            id: resolutions
-                            Layout.fillWidth: true
-                            model: backend.resource ? backend.resource.availableSizes : null
-                            delegate: ItemDelegate{
-                                width: parent.width
-                                text: modelData.width + " x " + modelData.height
-                                highlighted: parent.highlightedIndex === index
-                            }
-                            contentItem: Label{
-                                verticalAlignment: Qt.AlignVCenter
-                                horizontalAlignment: Qt.AlignLeft
-                                leftPadding: 10
-                                text: resolutions.currentIndex !== -1
-                                      ? resolutions.model[resolutions.currentIndex].width + " x " + resolutions.model[resolutions.currentIndex].height
-                                      : ""
-                            }
-                            onActivated: {
-                                console.log("activated", index)
-                                backend.resource.size = model[index]
-                            }
-                        }
-                        Label{
-                            text: "Format"
-                            font.pixelSize: 14
-                        }
-                        ComboBox{
-                            Layout.fillWidth: true
-                            model: backend.resource ? backend.resource.availableColorFormats : null
-                            onActivated: {
-                                console.log("activated", index)
-                                backend.resource.colorFormat = model[index]
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        Frame{
-            SplitView.fillWidth: true
-            SplitView.fillHeight: true
-
-            VideoOutput{
-                anchors.fill: parent
-                anchors.bottomMargin: stream.height
-                source: backend
-                fillMode: VideoOutput.PreserveAspectFit
-            }
-            Frame{
-                id: stream
-                anchors{
-                    bottom: parent.bottom
-                    left: parent.left
-                    right: parent.right
-                }
-                padding: 2
-                visible: backend.resource
-                Row{
-                    anchors.centerIn: parent
-                    spacing: 2
-                    Rectangle{
-                        radius: 10
-                        color: backend.resource.stream.state === Stream.Stopped ? "blue" : backend.resource.stream.state === Stream.Playing ? "green" : "red"
-                        width: 20
-                        height: 20
-                        ToolTip.text: backend.resource.stream.errorString
-                        MouseArea{
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            onHoveredChanged: {
-                               if(containsMouse && backend.resource.stream.errorString.length) {
-                                   parent.ToolTip.visible = true
-                               }
-                            }
-                        }
-                    }
-                    Button{
-                        id: startButton
-                        text: "Start"
-                        onClicked: {
-                            backend.resource.stream.start()
-                        }
-                    }
-                    Button{
-                        id: stopButton
-                        text: "Stop"
-                        onClicked: {
-                            backend.resource.stream.stop()
-                        }
-                    }
+    header: ToolBar{
+        RowLayout{
+            anchors.left: parent.left
+            ToolButton{
+                text: "Video"
+                onClicked: {
+                    videoSettingsDrawer.open()
                 }
             }
         }
     }
 
-    Rectangle{
-        id: footer
-        anchors{
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
+    Drawer{
+        id: videoSettingsDrawer
+        width: 350
+        height: parent.height
+
+        BusyIndicator{
+            id: videoSettingsBusyIndicator
+            anchors.centerIn: parent
+            width: 70
+            height: width
+            running: false
         }
-        height: 40
-        color: "green"
+
+        ColumnLayout{
+            id: videoSettingsLayout
+            spacing: 5
+            anchors{
+                top: parent.top
+                left: parent.left
+                right: parent.right
+                margins: 5
+            }
+            clip: true
+            enabled: !videoSettingsBusyIndicator.running
+            states: [
+                State{
+                    name: "HAS PROVIDER"
+                    PropertyChanges { target: availableProviders; visible: false }
+                    PropertyChanges { target: availableResources; visible: true }
+                    PropertyChanges { target: currentProviderRow; visible: true }
+                    PropertyChanges { target: currentProvider; text: backend.provider.provider }
+                    PropertyChanges { target: providerOriginRow; visible: true }
+                    PropertyChanges { target: providerOrigin; text: backend.provider.origin }
+                    PropertyChanges { target: availableResourcesList; model: backend.provider.availableResources }
+                    PropertyChanges { target: videoSettingsBusyIndicator; running: backend.provider.state === Provider.Initialising }
+                },
+                State{
+                    name: "HAS RESOURCE"
+                    extend: "HAS PROVIDER"
+                    PropertyChanges { target: availableResources; visible: false }
+                    PropertyChanges { target: resourceNameRow; visible: true }
+                    PropertyChanges { target: resourceName; text: backend.resource.resource }
+                    PropertyChanges { target: resourceParametersLayout; visible: true; }
+                    PropertyChanges { target: resolutions; model: backend.resource.availableSizes; }
+                    PropertyChanges { target: formats; model: backend.resource.availableColorFormats; }
+                    PropertyChanges { target: applyVideoSettingsButton; visible: true; }
+                    PropertyChanges { target: videoSettingsBusyIndicator; running: backend.resource.state === Resource.Initialising }
+                },
+                State{
+                    name: "APPLIED"
+                    extend: "HAS RESOURCE"
+                    PropertyChanges { target: applyVideoSettingsButton; visible: false; }
+                    PropertyChanges { target: resourceParametersLayout; enabled: false; }
+                    PropertyChanges {
+                        target: streamStatus;
+                        color: backend.resource.stream.state === Stream.Stopped ? "blue" :
+                                                                                       backend.resource.stream.state === Stream.Playing ? "green" : "red";
+                    }
+                }
+
+            ]
+
+            Label{
+                Layout.fillWidth: true
+                Layout.bottomMargin: 5
+                horizontalAlignment: Qt.AlignHCenter
+                text: qsTr("Video Settings")
+                ToolButton{
+                    id: resetProviderButton
+                    anchors.right: parent.right
+                    height: parent.height
+                    text: "Reset"
+                    onClicked: {
+                        videoSettingsLayout.state = ""
+                        backend.resetProvider()
+                    }
+                }
+            }
+
+            Frame{
+                id: availableProviders
+                Layout.fillWidth: true
+                Layout.preferredHeight: availableProvidersList.contentHeight + availableProvidersList.anchors.margins * 2
+                padding: 0
+                ListView{
+                    id: availableProvidersList
+                    anchors.fill: parent
+                    anchors.margins: 4
+                    model: backend.availableProviders()
+                    clip: true
+                    header: Label{
+                        width: parent.width
+                        text: qsTr("Providers:")
+                        font.pixelSize: 15
+                        horizontalAlignment: Qt.AlignHCenter
+                    }
+                    delegate: Button {
+                        width: parent.width
+                        text: modelData
+                        onClicked: {
+                            backend.createProvider(modelData)
+                            videoSettingsLayout.state = "HAS PROVIDER"
+                        }
+                    }
+                }
+            }
+
+            Row{
+                id: currentProviderRow
+                Layout.fillWidth: true
+                visible: false
+                spacing: 5
+                Label{
+                    text: qsTr("Provider:")
+                }
+                Label{
+                    id: currentProvider
+                    width: 300
+                    elide: Text.ElideLeft
+                }
+            }
+            Row{
+                id: providerOriginRow
+                Layout.fillWidth: true
+                visible: false
+                spacing: 5
+                Label{
+                    text: qsTr("Origin:")
+                }
+                Label{
+                    id: providerOrigin
+                    width: 300
+                    elide: Text.ElideLeft
+                }
+            }
+
+            Frame{
+                id: availableResources
+                Layout.fillWidth: true
+                Layout.preferredHeight: availableResourcesList.contentPlusMargin < 300 ? availableResourcesList.contentPlusMargin : 300
+                padding: 0
+                visible: availableResourcesList.model ? true : false
+
+                ScrollView{
+                    anchors.fill: parent
+                    ListView{
+                        property int contentPlusMargin: contentHeight + anchors.margins * 2
+                        id: availableResourcesList
+                        width: parent.width
+                        anchors.margins: 4
+                        clip: true
+
+                        header: Label{
+                            width: parent.width
+                            text: qsTr("Resources:")
+                            font.pixelSize: 15
+                            horizontalAlignment: Qt.AlignHCenter
+                        }
+                        delegate: Button {
+                            width: parent.width
+                            text: modelData
+                            onClicked: {
+                                backend.createResource(modelData)
+                                videoSettingsLayout.state = "HAS RESOURCE"
+                            }
+                        }
+                    }
+                }
+            }
+
+            Row{
+                id: resourceNameRow
+                Layout.fillWidth: true
+                visible: false
+                spacing: 5
+                Label{
+                    text: qsTr("Resource:")
+                }
+                Label{
+                    id: resourceName
+                    elide: Text.ElideLeft
+                    width: 270
+                }
+            }
+
+            GridLayout{
+                id: resourceParametersLayout
+                Layout.fillWidth: true
+                Layout.topMargin: 10
+                columns: 2
+                columnSpacing: 5
+                rowSpacing: 5
+                visible: false
+
+                Label{
+                    text: qsTr("Resolution")
+                }
+                ComboBox{
+                    id: resolutions
+                    Layout.fillWidth: true
+                    //TODO add default background
+                    delegate: ItemDelegate{
+                        width: parent.width
+                        text: modelData.width + " x " + modelData.height
+                        highlighted: parent.highlightedIndex === index
+                    }
+                    contentItem: Label{
+                        verticalAlignment: Qt.AlignVCenter
+                        horizontalAlignment: Qt.AlignLeft
+                        leftPadding: 10
+                        text: resolutions.currentIndex !== -1
+                        ? resolutions.model[resolutions.currentIndex].width + " x " + resolutions.model[resolutions.currentIndex].height
+                        : ""
+                    }
+                }
+                Label{
+                    text: qsTr("Format")
+                }
+                ComboBox{
+                    id: formats
+                    Layout.fillWidth: true
+                }
+            }
+
+            Button{
+                id: applyVideoSettingsButton
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 5
+                text: qsTr("Apply")
+                visible: false
+                onClicked: {
+                    videoSettingsDrawer.close()
+                    videoSettingsLayout.state = "APPLIED"
+                    backend.applyResource()
+                }
+            }
+        }
+    }
+
+    VideoOutput{
+        anchors.fill: parent
+        source: backend
+        fillMode: VideoOutput.PreserveAspectFit
+    }
+
+    footer: ToolBar{
+        visible: backend.resource !== null && backend.resource.stream !== null
+        RowLayout{
+            anchors.centerIn: parent
+            Rectangle{
+                id: streamStatus
+                Layout.alignment: Qt.AlignVCenter
+                radius: 20
+                width: 20
+                height: 20
+            }
+            ToolButton{
+                text: "Start"
+                onClicked: {
+                    backend.resource.stream.start()
+                }
+            }
+            ToolButton{
+                text: "Stop"
+                onClicked: {
+                    backend.resource.stream.stop()
+                }
+            }
+        }
     }
 }
