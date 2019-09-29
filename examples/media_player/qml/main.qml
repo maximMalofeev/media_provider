@@ -68,8 +68,9 @@ ApplicationWindow {
                     name: "PROVIDER ERROR"
                     extend: "HAS PROVIDER"
                     PropertyChanges { target: providerErrorRow; visible: true }
-                    PropertyChanges { target: providerError; text: backend.provider.errorString }
+                    PropertyChanges { target: providerError; text: backend.provider.errorString; color: "red" }
                     PropertyChanges { target: availableResourcesList; model: null }
+                    PropertyChanges { target: applyVideoSettingsButton; text: "Ok"; onClicked: {backend.resetProvider(); videoSettingsLayout.state = ""} }
                 },
                 State{
                     name: "HAS RESOURCE"
@@ -89,7 +90,7 @@ ApplicationWindow {
                     name: "RESOURCE ERROR"
                     extend: "HAS RESOURCE"
                     PropertyChanges { target: resourceErrorRow; visible: true }
-                    PropertyChanges { target: resourceError; text: backend.resource.errorString }
+                    PropertyChanges { target: resourceError; text: backend.resource.errorString; color: "red" }
                     PropertyChanges { target: resourceParametersLayout; visible: false; }
                     PropertyChanges { target: applyVideoSettingsButton; text: "Ok"; onClicked: {videoSettingsLayout.state = "HAS PROVIDER"} }
                 },
@@ -101,7 +102,7 @@ ApplicationWindow {
                     PropertyChanges {
                         target: streamStatus;
                         color: backend.resource.stream.state === Stream.Stopped ? "blue" :
-                                                                                       backend.resource.stream.state === Stream.Playing ? "green" : "red";
+                                                                                  backend.resource.stream.state === Stream.Playing ? "green" : "red";
                     }
                 }
 
@@ -187,6 +188,7 @@ ApplicationWindow {
                 spacing: 5
                 Label{
                     text: qsTr("Error:")
+                    color: "red"
                 }
                 Label{
                     id: providerError
@@ -251,6 +253,7 @@ ApplicationWindow {
                 spacing: 5
                 Label{
                     text: qsTr("Error:")
+                    color: "red"
                 }
                 Label{
                     id: resourceError
@@ -285,8 +288,8 @@ ApplicationWindow {
                         horizontalAlignment: Qt.AlignLeft
                         leftPadding: 10
                         text: resolutions.currentIndex !== -1
-                        ? resolutions.model[resolutions.currentIndex].width + " x " + resolutions.model[resolutions.currentIndex].height
-                        : ""
+                              ? resolutions.model[resolutions.currentIndex].width + " x " + resolutions.model[resolutions.currentIndex].height
+                              : ""
                     }
                 }
                 Label{
@@ -320,7 +323,9 @@ ApplicationWindow {
     }
 
     footer: ToolBar{
-        visible: backend.resource !== null && backend.resource.stream !== null
+        id: footer
+        visible: videoSettingsLayout.state === "APPLIED"
+
         RowLayout{
             anchors.centerIn: parent
             Rectangle{
