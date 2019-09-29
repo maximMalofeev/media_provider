@@ -75,6 +75,15 @@ ApplicationWindow {
                     PropertyChanges { target: videoSettingsBusyIndicator; running: backend.resource.state === Resource.Initialising }
                 },
                 State{
+                    name: "RESOURCE ERROR"
+                    extend: "HAS RESOURCE"
+                    when: backend.resource && backend.resource.state === Resource.Invalid
+                    PropertyChanges { target: resourceErrorRow; visible: true }
+                    PropertyChanges { target: resourceError; text: backend.resource.errorString }
+                    PropertyChanges { target: resourceParametersLayout; visible: false; }
+                    PropertyChanges { target: applyVideoSettingsButton; text: "Ok"; onClicked: {videoSettingsLayout.state = "HAS PROVIDER"} }
+                },
+                State{
                     name: "APPLIED"
                     extend: "HAS RESOURCE"
                     PropertyChanges { target: applyVideoSettingsButton; visible: false; }
@@ -206,6 +215,21 @@ ApplicationWindow {
                 }
                 Label{
                     id: resourceName
+                    elide: Text.ElideLeft
+                    width: 270
+                }
+            }
+
+            Row{
+                id: resourceErrorRow
+                Layout.fillWidth: true
+                visible: false
+                spacing: 5
+                Label{
+                    text: qsTr("Error:")
+                }
+                Label{
+                    id: resourceError
                     elide: Text.ElideLeft
                     width: 270
                 }
