@@ -58,7 +58,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
   explicit Stream(Resource* parent = nullptr);
   Q_DISABLE_COPY(Stream)
 
-  void setState(const State state);
+  void setState(State state);
   void setErrorString(const QString& errorStr);
   Resource* resource() const;
 
@@ -133,7 +133,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
    * method
    * @return true if success, false otherwise
    */
-  virtual bool setColorFormat(const QImage::Format format) = 0;
+  virtual bool setColorFormat(QImage::Format format) = 0;
   /**
    * @brief get the Stream object of a resource
    * @return stream
@@ -158,7 +158,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
   explicit Resource(QObject* parent = nullptr);
   Q_DISABLE_COPY(Resource)
 
-  void setState(const State state);
+  void setState(State state);
   void setResource(const QString& resource);
   void setErrorString(const QString& errorStr);
 
@@ -248,7 +248,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
   explicit Provider(QObject* parent = nullptr);
   Q_DISABLE_COPY(Provider)
 
-  void setState(const State state);
+  void setState(State state);
   void setAvailableResources(const QStringList& availableResources);
   void setErrorString(const QString& errorStr);
 

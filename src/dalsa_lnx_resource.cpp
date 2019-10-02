@@ -152,7 +152,7 @@ QImage::Format DalsaResource::colorFormat() const {
   return impl_->format;
 }
 
-bool DalsaResource::setColorFormat(const QImage::Format format) {
+bool DalsaResource::setColorFormat(QImage::Format format) {
   if (state() != Initialised) {
     return false;
   }

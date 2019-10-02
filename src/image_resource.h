@@ -15,7 +15,7 @@ class ImageResource : public Resource {
   QList<QVariant> availableSizes() const override;
   QList<QVariant> availableColorFormats() const override;
   QImage::Format colorFormat() const override;
-  bool setColorFormat(const QImage::Format format) override;
+  bool setColorFormat(QImage::Format format) override;
   Stream* stream() override;
 
  private:
