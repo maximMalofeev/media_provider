@@ -34,7 +34,7 @@ Stream::Stream(Resource *parent) : QObject(parent) {
     });
 }
 
-void Stream::setState(const Stream::State state) {
+void Stream::setState(State state) {
     if (impl_->state != state) {
         impl_->state = state;
         emit stateChanged();
@@ -67,7 +67,7 @@ Resource::Resource(QObject *parent) : QObject(parent) {
     impl_.reset(new Implementation);
 }
 
-void Resource::setState(const Resource::State state) {
+void Resource::setState(State state) {
     if (impl_->state != state) {
         impl_->state = state;
         emit stateChanged();
@@ -111,7 +111,7 @@ Provider::State Provider::state() const { return impl_->state; }
 
 QString Provider::origin() const { return impl_->origin; }
 
-void Provider::setState(const Provider::State state) {
+void Provider::setState(State state) {
     if (impl_->state != state) {
         impl_->state = state;
         emit stateChanged();

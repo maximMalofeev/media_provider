@@ -91,7 +91,7 @@ DalsaProvider::DalsaProvider(QObject *parent) {
 
 DalsaProvider::~DalsaProvider() {
   if (!SapManager::UnregisterServerCallback()) {
-    qWarning() << "Unable to unregister server callback";
+    qWarning() << "Unable to unregister server callback, reson:" << SapManager::GetLastStatus();
   }
 }
 

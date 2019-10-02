@@ -80,7 +80,7 @@ QImage::Format ImageResource::colorFormat() const {
   return impl_->image.format();
 }
 
-bool ImageResource::setColorFormat(const QImage::Format format) {
+bool ImageResource::setColorFormat(QImage::Format format) {
   if (state() != Initialised) {
     return false;
   }

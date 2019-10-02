@@ -90,7 +90,7 @@ QImage::Format QMediaPlayerBasedResource::colorFormat() const {
   return impl_->videoSurface->format();
 }
 
-bool QMediaPlayerBasedResource::setColorFormat(const QImage::Format format) {
+bool QMediaPlayerBasedResource::setColorFormat(QImage::Format format) {
   if (format == impl_->videoSurface->format()) {
     return true;
   } else {

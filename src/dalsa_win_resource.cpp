@@ -164,7 +164,7 @@ QImage::Format DalsaResource::colorFormat() const {
 }
 
 // TODO set format to sap device
-bool DalsaResource::setColorFormat(const QImage::Format format) {
+bool DalsaResource::setColorFormat(QImage::Format format) {
   if (state() == Initialised && impl_->availableColorFormats.contains(format)) {
     impl_->format = format;
     emit colorFormatChanged();

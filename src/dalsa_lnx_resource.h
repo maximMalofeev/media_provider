@@ -15,7 +15,7 @@ class DalsaResource : public Resource {
   QList<QVariant> availableSizes() const;
   QList<QVariant> availableColorFormats() const;
   QImage::Format colorFormat() const;
-  bool setColorFormat(const QImage::Format format);
+  bool setColorFormat(QImage::Format format);
   Stream* stream();
 
  private:
