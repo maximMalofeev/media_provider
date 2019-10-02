@@ -1,6 +1,7 @@
 #include "video_resource.h"
 #include <QMediaPlayer>
 #include <QUrl>
+#include <QFileInfo>
 #include "video_stream.h"
 #include "video_surface.h"
 
@@ -15,6 +16,8 @@ VideoResource::VideoResource(const QString& res, QObject* parent)
   impl_.reset(new Implementation);
   impl_->stream = new VideoStream{qMediaPlayer(), this};
   qMediaPlayer()->setMedia(QUrl::fromLocalFile(res));
+  QFileInfo fi(res);
+  setResource(fi.fileName());
   connect(videoSurface(), &VideoSurface::newFrame, impl_->stream, &VideoStream::onNewFrame);
 }
 

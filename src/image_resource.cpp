@@ -14,7 +14,8 @@ struct ImageResource::Implementation {
 ImageResource::ImageResource(const QString& res, QObject* parent)
     : Resource(parent) {
   impl_.reset(new Implementation);
-  setResource(res);
+  QFileInfo fi(res);
+  setResource(fi.fileName());
 
   connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, [this]() {
     if (impl_->imageWatcher.result()) {
