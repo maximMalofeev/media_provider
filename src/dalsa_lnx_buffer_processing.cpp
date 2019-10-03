@@ -56,7 +56,7 @@ DalsaBufferProcessing::DalsaBufferProcessing(void* gevCameraHandle,
     std::fill(impl_->buffers[i], impl_->buffers[i] + bufSize, 0);
   }
 
-  if (GevInitImageTransfer(impl_->handle, Asynchronous, NUM_BUFFERS,
+  if (GevInitializeTransfer(impl_->handle, Asynchronous, bufSize, NUM_BUFFERS,
                            impl_->buffers) != GEVLIB_OK) {
     qWarning() << "Unable to init image transfer";
     return;
@@ -68,7 +68,7 @@ DalsaBufferProcessing::DalsaBufferProcessing(void* gevCameraHandle,
 DalsaBufferProcessing::~DalsaBufferProcessing() {
   qDebug() << "DalsaBufferProcessing::~DalsaBufferProcessing()";
   stop();
-  GevFreeImageTransfer(impl_->handle);
+  GevFreeTransfer(impl_->handle);
   for (int i = 0; i < NUM_BUFFERS; i++) {
     delete[] impl_->buffers[i];
   }
@@ -85,18 +85,11 @@ void DalsaBufferProcessing::stop() {
 void DalsaBufferProcessing::run() {
   qDebug() << "DalsaBufferProcessing started";
 
-  auto cameraInfo = GevGetCameraInfo(impl_->handle);
-
   GEV_BUFFER_OBJECT* img = nullptr;
   GEV_STATUS status = 0;
-  UINT32 totalBuffers{}, numUsed{}, numFree{}, numTrashed{};
-  GevBufferCyclingMode mode;
   impl_->stopped = false;
   while (!impl_->stopped) {
-    GevQueryImageTransferStatus(impl_->handle, &totalBuffers, &numUsed,
-                                &numFree, &numTrashed, &mode);
-
-    status = GevWaitForNextImage(impl_->handle, &img, 1000);
+    status = GevWaitForNextFrame(impl_->handle, &img, 2000);
     if (status == GEVLIB_OK) {
       if (img != nullptr) {
         if (img->status == GEV_FRAME_STATUS_RECVD) {
@@ -122,18 +115,37 @@ void DalsaBufferProcessing::run() {
                         [](void* p) { delete static_cast<uchar*>(p); },
                         frame};
           emit newFrame(newImg, -1);
+        }else{
+          switch (img->status) {
+            case GEV_FRAME_STATUS_PENDING:
+              qDebug() << "GEV_FRAME_STATUS_PENDING";
+              break;
+            case GEV_FRAME_STATUS_TIMEOUT:
+              qDebug() << "GEV_FRAME_STATUS_TIMEOUT";
+              break;
+            case GEV_FRAME_STATUS_OVERFLOW:
+              qDebug() << "GEV_FRAME_STATUS_OVERFLOW";
+              break;
+            case GEV_FRAME_STATUS_BANDWIDTH:
+              qDebug() << "GEV_FRAME_STATUS_BANDWIDTH";
+              break;
+            case GEV_FRAME_STATUS_LOST:
+              qDebug() << "GEV_FRAME_STATUS_LOST";
+              break;
+            case GEV_FRAME_STATUS_RELEASED:
+              qDebug() << "GEV_FRAME_STATUS_RELEASED";
+              break;
+            default:
+              qDebug() << "Unexpected status";
+          }
         }
       } else {
         qDebug() << "GEV_BUFFER_OBJECT is nullptr";
       }
     } else {
       qDebug() << "GevWaitForNextImage failed with status:" << status;
-      if (status == static_cast<unsigned short>(GEVLIB_ERROR_TIME_OUT)) {
-        emit error("Wait for next image timed out");
-      } else {
-        emit error("Wait for next image failed with status: " +
-                   QString::number(status));
-      }
+      emit error("Wait for next image failed with status: " +
+                 QString::number(status));
       break;
     }
   }

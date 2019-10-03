@@ -18,7 +18,7 @@ ApplicationWindow {
         RowLayout{
             anchors.left: parent.left
             ToolButton{
-                text: "Video"
+                text: "\u2630"
                 onClicked: {
                     videoSettingsDrawer.open()
                 }
@@ -334,6 +334,8 @@ ApplicationWindow {
                 radius: 20
                 width: 20
                 height: 20
+                ToolTip.visible: footer.hovered && backend.resource.stream.state === Stream.Invalid
+                ToolTip.text: backend.resource.stream.errorString
             }
             ToolButton{
                 text: "Start"

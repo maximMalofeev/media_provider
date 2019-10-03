@@ -94,28 +94,18 @@ DalsaResource::DalsaResource(const QString &res, QObject *parent)
     impl_->size.setHeight(static_cast<int>(height));
     impl_->format = dalsaFormatToQImage(static_cast<int>(format));
 
-    // TODO ask why it required to properly image grabbing
-    status = GevInitGenICamXMLFeatures(impl_->handle, TRUE);
-    if (status != GEVLIB_OK) {
-      setErrorString("Unable to init xml features, status: " +
-                     QString::number(status));
-      return false;
-    }
-
-    //    GEV_CAMERA_OPTIONS camOptions{};
-    //    GevGetCameraInterfaceOptions(impl_->handle, &camOptions);
-    //    camOptions.heartbeat_timeout_ms = 90000;
-    //    GevSetCameraInterfaceOptions(impl_->handle, &camOptions);
-
     return true;
   });
   impl_->initialisationWatcher.setFuture(initialisationFuture);
 }
 
 DalsaResource::~DalsaResource() {
-  qDebug() << "DalsaResource::~DalsaResource()";
+  if(!impl_->initialisationWatcher.isFinished()){
+    impl_->initialisationWatcher.waitForFinished();
+  }
   impl_->stream->stop();
   GevCloseCamera(&impl_->handle);
+  qDebug() << "DalsaResource::~DalsaResource()";
 }
 
 QSize DalsaResource::size() const { return impl_->size; }

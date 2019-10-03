@@ -42,7 +42,7 @@ void DalsaStream::start() {
     return;
   }
   if (impl_->handle) {
-    if (GevStartImageTransfer(impl_->handle, -1) != GEVLIB_OK) {
+    if (GevStartTransfer(impl_->handle, -1) != GEVLIB_OK) {
       setState(Invalid);
       setErrorString("Unable to start image transfer");
       return;
@@ -56,9 +56,9 @@ void DalsaStream::stop() {
   if (impl_->handle && impl_->sapBufProcessing->isRunning()) {
     impl_->sapBufProcessing->stop();
     impl_->sapBufProcessing->wait();
-    GevStopImageTransfer(impl_->handle);
+    GevStopTransfer(impl_->handle);
   }
-  if (state() != Stopped) {
+  if (state() != Invalid) {
     setState(Stopped);
   }
 }

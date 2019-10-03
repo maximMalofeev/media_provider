@@ -24,12 +24,6 @@ DalsaProvider::DalsaProvider(QObject *parent) : Provider(parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(ORIGIN);
 
-  if (GevApiInitialize() != GEVLIB_OK) {
-    setState(Invalid);
-    setErrorString("Unable to initialise GevApi");
-    return;
-  }
-
   connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished,
           [this]() {
             if (!impl_->availableCamerasWatcher.result()) {
@@ -63,7 +57,9 @@ DalsaProvider::DalsaProvider(QObject *parent) : Provider(parent) {
 }
 
 DalsaProvider::~DalsaProvider() {
-  GevApiUninitialize();
+  if(!impl_->availableCamerasWatcher.isFinished()){
+    impl_->availableCamerasWatcher.waitForFinished();
+  }
   qDebug() << "DalsaProvider::~DalsaProvider()";
 }
 
