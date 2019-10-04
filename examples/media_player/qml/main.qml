@@ -175,10 +175,13 @@ ApplicationWindow {
                 Label{
                     text: qsTr("Origin:")
                 }
-                Label{
+                TextField{
                     id: providerOrigin
                     width: 300
-                    elide: Text.ElideLeft
+                    onAccepted: {
+                        backend.provider.origin = providerOrigin.text
+                        focus = false
+                    }
                 }
             }
             Row{

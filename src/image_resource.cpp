@@ -31,8 +31,8 @@ ImageResource::ImageResource(const QString& res, QObject* parent)
   });
 
   impl_->stream = new ImageStream(&impl_->image, this);
-  auto future = QtConcurrent::run([this]() {
-    if (impl_->image.load(resource())) {
+  auto future = QtConcurrent::run([this, fi]() {
+    if (impl_->image.load(fi.absoluteFilePath())) {
       return true;
     }
     return false;
