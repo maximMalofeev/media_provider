@@ -20,7 +20,7 @@ RtspResource::RtspResource(const QString &resource, QObject *parent)
           &RtspStream::onNewFrame);
 }
 
-RtspResource::~RtspResource() = default;
+RtspResource::~RtspResource() {};
 
 Stream *RtspResource::stream() { return impl_->stream; }
 

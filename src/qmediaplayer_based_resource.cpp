@@ -48,7 +48,7 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
   impl_->player->setVideoOutput(impl_->videoSurface);
 }
 
-QMediaPlayerBasedResource::~QMediaPlayerBasedResource() = default;
+QMediaPlayerBasedResource::~QMediaPlayerBasedResource() {};
 
 QSize QMediaPlayerBasedResource::size() const {
   if (state() != Initialised) {

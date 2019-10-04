@@ -10,7 +10,6 @@ struct VideoStream::Implementation {
 VideoStream::VideoStream(QMediaPlayer *player, Resource *parent)
     : Stream(parent) {
   impl_.reset(new Implementation{player});
-  player->setParent(this);
   connect(impl_->player, &QMediaPlayer::stateChanged,
           [this](QMediaPlayer::State state) {
             if (state == QMediaPlayer::PlayingState) {
@@ -19,14 +18,18 @@ VideoStream::VideoStream(QMediaPlayer *player, Resource *parent)
               setState(Stopped);
             }
           });
+  connect(impl_->player, &QMediaPlayer::mediaStatusChanged,
+          [this](QMediaPlayer::MediaStatus status) {
+            if (status == QMediaPlayer::EndOfMedia) {
+              setState(Stopped);
+            }
+          });
 }
 
-VideoStream::~VideoStream() {
-  stop();
-}
+VideoStream::~VideoStream() {}
 
 void VideoStream::start() {
-  if(resource()->state() != Resource::Initialised){
+  if (resource()->state() != Resource::Initialised) {
     return;
   }
   if (auto s = state(); s == Invalid || s == Playing) {

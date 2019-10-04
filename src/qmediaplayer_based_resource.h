@@ -23,9 +23,6 @@ class QMediaPlayerBasedResource : public Resource
   bool setColorFormat(QImage::Format format) override;
 
  protected:
-  // If stream required to use media player after
-  // QMediaPlayerBasedResource::~QMediaPlayerBasedResource() it has to take
-  // parentness of it
   QMediaPlayer* qMediaPlayer() const;
   VideoSurface* videoSurface() const;
 
