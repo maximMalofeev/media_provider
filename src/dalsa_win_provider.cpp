@@ -50,7 +50,9 @@ DalsaProvider::DalsaProvider(QObject *parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(DEFAULT_ORIGIN);
 
+  SapManager::Open();
   SapManager::SetDisplayStatusMode(SapManager::StatusLog);
+  SapManager::SetCommandTimeout(5000);
 
   connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished,
           [this]() {

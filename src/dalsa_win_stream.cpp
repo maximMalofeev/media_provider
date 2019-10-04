@@ -29,6 +29,9 @@ DalsaStream::~DalsaStream() {
   if (impl_->sapBufWithTrash) {
     impl_->sapBufWithTrash->Destroy();
   }
+  if(impl_->sapDevice){
+    impl_->sapDevice->Destroy();
+  }
 }
 
 bool DalsaStream::initialise() {
