@@ -12,10 +12,12 @@ const QString DEFAULT_ORIGIN = "dalsa_server";
 
 // Check if able to create server and vendor is Dalsa
 static bool isServerAppropriate(const int serverIndex) {
+  if(SapManager::IsSystemLocation(serverIndex)){
+    return false;
+  }
   if (!SapManager::IsServerAccessible(serverIndex)) {
     qDebug() << "Server not accessible";
     return false;
-    ;
   }
   SapAcqDevice acqDevice(SapLocation(serverIndex), true);
   if (acqDevice.Create()) {
@@ -52,8 +54,8 @@ DalsaProvider::DalsaProvider(QObject *parent) {
 
   connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished,
           [this]() {
-            setState(Initialised);
             setAvailableResources(impl_->resourcesWartcher.result());
+            setState(Initialised);
 
             if (!SapManager::RegisterServerCallback(
                     SapManager::EventServerDisconnected |
@@ -93,6 +95,9 @@ DalsaProvider::~DalsaProvider() {
   if (!SapManager::UnregisterServerCallback()) {
     qWarning() << "Unable to unregister server callback, reson:" << SapManager::GetLastStatus();
   }
+  if(!SapManager::Close()){
+    qWarning() << "Unable to close sap, reson:" << SapManager::GetLastStatus();
+  }
 }
 
 QString DalsaProvider::provider() const { return PROVIDER_NAME; }
@@ -118,6 +123,7 @@ Resource *DalsaProvider::createResource(const QString &resource) {
 }
 
 void DalsaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
+  qDebug() << "onServerEvent";
   const auto serverIndex = callbackInfo->GetServerIndex();
   char serverName[CORSERVER_MAX_STRLEN]{0};
   if (!SapManager::GetServerName(serverIndex, serverName)) {
@@ -149,6 +155,7 @@ void DalsaProvider::onServerEvent(SapManCallbackInfo *callbackInfo) {
     if (isServerAppropriate(serverIndex)) {
       auto availableRes = provider->availableResources();
       availableRes.push_back(serverName);
+      //TODO protect with mutex
       provider->setAvailableResources(availableRes);
     }
   }

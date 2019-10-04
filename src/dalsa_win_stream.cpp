@@ -98,6 +98,7 @@ void DalsaStream::stop() {
     return;
   }
   impl_->sapAcqDeviceToBuffer->Freeze();
+  impl_->sapAcqDeviceToBuffer->Wait(5000);
   setState(Stopped);
 }
 
