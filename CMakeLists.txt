@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(media_provider)
 
+option(WITHOUT_DALSA "Determine use Dalsa or not" ON)
+
 set (${PROJECT_NAME}_VERSION_MAJOR 1)
 set (${PROJECT_NAME}_VERSION_MINOR 0)
 

@@ -56,7 +56,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Stream : public QObject {
 
  protected:
   explicit Stream(Resource* parent = nullptr);
-  Q_DISABLE_COPY(Stream)
+  Q_DISABLE_COPY_MOVE(Stream)
 
   void setState(State state);
   void setErrorString(const QString& errorStr);
@@ -156,7 +156,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
 
  protected:
   explicit Resource(QObject* parent = nullptr);
-  Q_DISABLE_COPY(Resource)
+  Q_DISABLE_COPY_MOVE(Resource)
 
   void setState(State state);
   void setResource(const QString& resource);
@@ -246,7 +246,7 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
 
  protected:
   explicit Provider(QObject* parent = nullptr);
-  Q_DISABLE_COPY(Provider)
+  Q_DISABLE_COPY_MOVE(Provider)
 
   void setState(State state);
   void setAvailableResources(const QStringList& availableResources);
