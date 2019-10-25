@@ -29,7 +29,7 @@ DalsaStream::~DalsaStream() {
   if (impl_->sapBufWithTrash) {
     impl_->sapBufWithTrash->Destroy();
   }
-  if(impl_->sapDevice){
+  if (impl_->sapDevice) {
     impl_->sapDevice->Destroy();
   }
 }
@@ -76,21 +76,22 @@ void DalsaStream::XferCallback(SapXferCallbackInfo *pInfo) {
     return;
   }
 
-  auto sapBufProcessing_ =
+  auto sapBufProcessing =
       static_cast<DalsaBufferProcessing *>(pInfo->GetContext());
-  sapBufProcessing_->Execute();
+  sapBufProcessing->Execute();
 }
 
 void DalsaStream::start() {
-  if(resource()->state() != Resource::Initialised){
+  if (resource()->state() != Resource::Initialised) {
     return;
   }
   if (auto s = state(); s == Invalid || s == Playing) {
     return;
   }
-  if(!impl_->sapAcqDeviceToBuffer->Grab()){
+  if (!impl_->sapAcqDeviceToBuffer->Grab()) {
     setState(Invalid);
-    setErrorString(QString{"Unable to grab, reason"} + impl_->sapAcqDeviceToBuffer->GetLastStatus());
+    setErrorString(QString{"Unable to grab, reason"} +
+                   impl_->sapAcqDeviceToBuffer->GetLastStatus());
     return;
   }
   setState(Playing);

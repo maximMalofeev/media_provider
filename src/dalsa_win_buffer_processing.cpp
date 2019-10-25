@@ -39,7 +39,7 @@ BOOL DalsaBufferProcessing::Run() {
                 format,
                 [](void* p) { delete static_cast<uchar*>(p); },
                 frame};
-  emit newFrame(newImg, timestamp);
+  emit newFrame(newImg, timestamp / 1000);
 
   return true;
 }
