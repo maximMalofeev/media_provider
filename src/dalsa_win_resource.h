@@ -20,6 +20,8 @@ class DalsaResource : public Resource {
   bool setColorFormat(QImage::Format format) override;
   Stream* stream() override;
 
+  void initialise() override;
+
  public slots:
   void onServerDisconnected(const QString& serverName);
 

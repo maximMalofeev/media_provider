@@ -10,6 +10,8 @@ class RtspResource : public QMediaPlayerBasedResource {
   RtspResource(const QString& resource, QObject* parent = nullptr);
   ~RtspResource();
 
+  void initialise() override;
+
   Stream* stream() override;
 
  private:

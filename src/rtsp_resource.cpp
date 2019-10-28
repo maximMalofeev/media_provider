@@ -15,12 +15,17 @@ RtspResource::RtspResource(const QString &resource, QObject *parent)
     : QMediaPlayerBasedResource(resource, parent) {
   impl_.reset(new Implementation);
   impl_->stream = new RtspStream{qMediaPlayer(), this};
-  qMediaPlayer()->setMedia(QUrl(resource));
+  setResource(resource);
   connect(videoSurface(), &VideoSurface::newFrame, impl_->stream,
           &RtspStream::onNewFrame);
 }
 
-RtspResource::~RtspResource() {};
+RtspResource::~RtspResource() {}
+
+void RtspResource::initialise() {
+  setState(Initialising);
+  qMediaPlayer()->setMedia(QUrl(resource()));
+}
 
 Stream *RtspResource::stream() { return impl_->stream; }
 

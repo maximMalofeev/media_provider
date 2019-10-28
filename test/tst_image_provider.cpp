@@ -71,6 +71,7 @@ void TestImageProvider::test_createResource() {
   }
   auto resStr = resources.first();
   auto resource = provider_->createResource(resStr);
+  resource->initialise();
   QSignalSpy stateChangedSpy(resource, SIGNAL(stateChanged()));
   QVERIFY(resource);
   QCOMPARE(resStr, resource->resource());

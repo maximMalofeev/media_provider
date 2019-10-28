@@ -18,6 +18,8 @@ class ImageResource : public Resource {
   bool setColorFormat(QImage::Format format) override;
   Stream* stream() override;
 
+  void initialise() override;
+
  private:
   struct Implementation;
   QScopedPointer<Implementation> impl_;

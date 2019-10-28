@@ -10,6 +10,8 @@ class VideoResource : public QMediaPlayerBasedResource {
   VideoResource(const QString& res, QObject* parent = nullptr);
   ~VideoResource();
 
+  void initialise() override;
+
   Stream* stream() override;
 
  private:

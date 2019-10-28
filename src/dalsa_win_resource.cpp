@@ -30,6 +30,61 @@ DalsaResource::DalsaResource(const QString &res, QObject *parent)
   impl_.reset(new Implementation);
   setResource(res);
   impl_->stream = new DalsaStream{res, this};
+}
+
+DalsaResource::~DalsaResource() {}
+
+QSize DalsaResource::size() const {
+  if (state() == Initialised) {
+    return impl_->size;
+  }
+  return {};
+}
+
+// TODO set size to sap device
+bool DalsaResource::setSize(const QSize &size) {
+  if (state() == Initialised && impl_->size == size) {
+    return true;
+  }
+  return false;
+}
+
+QList<QVariant> DalsaResource::availableSizes() const {
+  if (state() == Initialised) {
+    return {impl_->size};
+  }
+  return {};
+}
+
+QList<QVariant> DalsaResource::availableColorFormats() const {
+  if (state() == Initialised) {
+    return impl_->availableColorFormats;
+  }
+  return {};
+}
+
+QImage::Format DalsaResource::colorFormat() const {
+  if (state() == Initialised) {
+    return impl_->format;
+  }
+  return QImage::Format_Invalid;
+}
+
+// TODO set format to sap device
+bool DalsaResource::setColorFormat(QImage::Format format) {
+  if (state() == Initialised && impl_->availableColorFormats.contains(format)) {
+    impl_->format = format;
+    emit colorFormatChanged();
+    return true;
+  }
+  setErrorString("Unable to set unsupported color format");
+  return false;
+}
+
+Stream *DalsaResource::stream() { return impl_->stream; }
+
+void DalsaResource::initialise() {
+  setState(Initialising);
 
   connect(&impl_->initWatcher, &QFutureWatcher<bool>::finished, [this]() {
     if (impl_->initWatcher.result() && impl_->stream->initialise()) {
@@ -124,57 +179,6 @@ DalsaResource::DalsaResource(const QString &res, QObject *parent)
 
   impl_->initWatcher.setFuture(future);
 }
-
-DalsaResource::~DalsaResource() {}
-
-QSize DalsaResource::size() const {
-  if (state() == Initialised) {
-    return impl_->size;
-  }
-  return {};
-}
-
-// TODO set size to sap device
-bool DalsaResource::setSize(const QSize &size) {
-  if (state() == Initialised && impl_->size == size) {
-    return true;
-  }
-  return false;
-}
-
-QList<QVariant> DalsaResource::availableSizes() const {
-  if (state() == Initialised) {
-    return {impl_->size};
-  }
-  return {};
-}
-
-QList<QVariant> DalsaResource::availableColorFormats() const {
-  if (state() == Initialised) {
-    return impl_->availableColorFormats;
-  }
-  return {};
-}
-
-QImage::Format DalsaResource::colorFormat() const {
-  if (state() == Initialised) {
-    return impl_->format;
-  }
-  return QImage::Format_Invalid;
-}
-
-// TODO set format to sap device
-bool DalsaResource::setColorFormat(QImage::Format format) {
-  if (state() == Initialised && impl_->availableColorFormats.contains(format)) {
-    impl_->format = format;
-    emit colorFormatChanged();
-    return true;
-  }
-  setErrorString("Unable to set unsupported color format");
-  return false;
-}
-
-Stream *DalsaResource::stream() { return impl_->stream; }
 
 void DalsaResource::onServerDisconnected(const QString &serverName) {
   if (serverName == resource()) {

@@ -83,11 +83,12 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
  public:
   /**
    * @brief The State enum describes resource state,
+   * NotInitialised - default state of new object
    * Initialising - while trying to load a resource
    * Initialised - if resource loaded successfully
    * Invalid - if resouce loading failed
    */
-  enum State { Initialising, Initialised, Invalid };
+  enum State { NotInitialised, Initialising, Initialised, Invalid };
   Q_ENUM(State)
 
   ~Resource();
@@ -144,6 +145,12 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Resource : public QObject {
    * @return last error string
    */
   virtual QString errorString() const;
+
+ public slots:
+  /**
+   * @brief initialise resource
+   */
+  virtual void initialise() = 0;
 
  signals:
   void stateChanged();

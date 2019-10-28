@@ -7,6 +7,7 @@ namespace MediaProvider {
 
 struct ImageResource::Implementation {
   QFutureWatcher<bool> imageWatcher;
+  QFileInfo fi;
   QImage image;
   ImageStream* stream = {};
 };
@@ -14,30 +15,8 @@ struct ImageResource::Implementation {
 ImageResource::ImageResource(const QString& res, QObject* parent)
     : Resource(parent) {
   impl_.reset(new Implementation);
-  QFileInfo fi(res);
-  setResource(fi.fileName());
-
-  connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, [this]() {
-    if (impl_->imageWatcher.result()) {
-      setState(Initialised);
-    } else {
-      setState(Invalid);
-      setErrorString("Unable to load " + resource());
-    }
-    emit sizeChanged();
-    emit colorFormatChanged();
-    emit availableSizesChanged();
-    emit availableColorFormatsChanged();
-  });
-
-  impl_->stream = new ImageStream(&impl_->image, this);
-  auto future = QtConcurrent::run([this, fi]() {
-    if (impl_->image.load(fi.absoluteFilePath())) {
-      return true;
-    }
-    return false;
-  });
-  impl_->imageWatcher.setFuture(future);
+  impl_->fi = QFileInfo(res);
+  setResource(impl_->fi.fileName());
 }
 
 ImageResource::~ImageResource() {}
@@ -93,5 +72,30 @@ bool ImageResource::setColorFormat(QImage::Format format) {
 }
 
 Stream* ImageResource::stream() { return impl_->stream; }
+
+void ImageResource::initialise() {
+  setState(Initialising);
+  connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, [this]() {
+    if (impl_->imageWatcher.result()) {
+      setState(Initialised);
+    } else {
+      setState(Invalid);
+      setErrorString("Unable to load " + resource());
+    }
+    emit sizeChanged();
+    emit colorFormatChanged();
+    emit availableSizesChanged();
+    emit availableColorFormatsChanged();
+  });
+
+  impl_->stream = new ImageStream(&impl_->image, this);
+  auto future = QtConcurrent::run([this]() {
+    if (impl_->image.load(impl_->fi.absoluteFilePath())) {
+      return true;
+    }
+    return false;
+  });
+  impl_->imageWatcher.setFuture(future);
+}
 
 }  // namespace MediaProvider

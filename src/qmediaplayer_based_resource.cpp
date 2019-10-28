@@ -14,7 +14,6 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
                                                      QObject* parent)
     : Resource(parent) {
   impl_.reset(new Implementation);
-  setResource(res);
   impl_->player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
   connect(
       impl_->player, &QMediaPlayer::mediaStatusChanged,
@@ -26,7 +25,8 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
           emit availableSizesChanged();
           emit colorFormatChanged();
           emit availableColorFormatsChanged();
-        }else if(status == QMediaPlayer::InvalidMedia && state() == Initialising){
+        } else if (status == QMediaPlayer::InvalidMedia &&
+                   state() == Initialising) {
           setState(Invalid);
           setErrorString(impl_->player->errorString());
         }
@@ -38,7 +38,7 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
                      << impl_->player->errorString();
             setState(Invalid);
             QString errStr = "Media player error: " + QString::number(error);
-            if(!impl_->player->errorString().isEmpty()){
+            if (!impl_->player->errorString().isEmpty()) {
               errStr += " - " + impl_->player->errorString();
             }
             setErrorString(errStr);
@@ -48,7 +48,7 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
   impl_->player->setVideoOutput(impl_->videoSurface);
 }
 
-QMediaPlayerBasedResource::~QMediaPlayerBasedResource() {};
+QMediaPlayerBasedResource::~QMediaPlayerBasedResource(){};
 
 QSize QMediaPlayerBasedResource::size() const {
   if (state() != Initialised) {

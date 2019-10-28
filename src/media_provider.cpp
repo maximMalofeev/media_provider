@@ -58,7 +58,7 @@ QString Stream::errorString() const { return impl_->lastError; }
 
 // ==================Resource==================
 struct Resource::Implementation {
-    State state = Initialising;
+    State state = NotInitialised;
     QString resource;
     QString lastError;
 };
