@@ -7,9 +7,6 @@
 Backend::Backend(QObject *parent) : QObject(parent) {}
 
 Backend::~Backend() {
-  if (resource_) {
-    delete resource_;
-  }
   if (provider_) {
     delete provider_;
   }
@@ -20,10 +17,7 @@ QStringList Backend::availableProviders() const {
 }
 
 void Backend::resetProvider() {
-  if (resource_) {
-    resource_->deleteLater();
-    resource_ = nullptr;
-  }
+  resource_ = nullptr;
   if (provider_) {
     provider_->deleteLater();
     provider_ = nullptr;
@@ -68,6 +62,7 @@ void Backend::createResource(const QString &resourceName) {
       resource_->deleteLater();
     }
     resource_ = resource;
+    resource_->initialise();
     emit resourceChanged();
   }
 }
