@@ -7,7 +7,6 @@
 Backend::Backend(QObject *parent) : QObject(parent) {}
 
 Backend::~Backend() {
-  qDebug() << "Backend::~Backend()";
   if (resource_) {
     delete resource_;
   }
@@ -33,7 +32,6 @@ void Backend::resetProvider() {
 
 void Backend::applyResource() {
   if (videoSurface_) {
-    qDebug() << "==VideoSurface available==";
     if (videoSurface_->isActive()) {
       videoSurface_->stop();
     }

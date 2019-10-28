@@ -211,10 +211,6 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
    */
   virtual bool setOrigin(const QString& orig);
   /**
-   * @brief initialise provider with an origin
-   */
-  virtual void initialise() = 0;
-  /**
    * @brief this function return available resources of current origin
    * @return list of available resources
    */
@@ -243,6 +239,12 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
    * @return list of available providers
    */
   static QStringList availableProviders();
+
+ public slots:
+  /**
+   * @brief initialise provider with an origin
+   */
+  virtual void initialise() = 0;
 
  signals:
   void stateChanged();

@@ -142,11 +142,15 @@ ApplicationWindow {
                         font.pixelSize: 15
                         horizontalAlignment: Qt.AlignHCenter
                     }
-                    delegate: Button {
+                    delegate: ItemDelegate {
                         width: parent.width
                         text: modelData
                         onClicked: {
                             backend.createProvider(modelData)
+                            if(backend.provider){
+                                backend.provider.initialise()
+                            }
+
                             videoSettingsLayout.state = "HAS PROVIDER"
                         }
                     }
@@ -180,6 +184,7 @@ ApplicationWindow {
                     width: 300
                     onAccepted: {
                         backend.provider.origin = providerOrigin.text
+                        backend.provider.initialise()
                         focus = false
                     }
                 }
@@ -205,7 +210,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 Layout.preferredHeight: availableResourcesList.contentPlusMargin < 300 ? availableResourcesList.contentPlusMargin : 300
                 padding: 0
-                visible: availableResourcesList.model ? true : false
+                visible: false
 
                 ScrollView{
                     anchors.fill: parent
@@ -222,7 +227,7 @@ ApplicationWindow {
                             font.pixelSize: 15
                             horizontalAlignment: Qt.AlignHCenter
                         }
-                        delegate: Button {
+                        delegate: ItemDelegate {
                             width: parent.width
                             text: modelData
                             onClicked: {
