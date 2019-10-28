@@ -19,7 +19,7 @@ QString MediaProvider::ImageProvider::provider() const { return PROVIDER_NAME; }
 
 Resource *ImageProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    return new ImageResource(getPath(resource));
+    return new ImageResource{getPath(resource), this};
   }
   setErrorString(
       "Unable to create unexisting resource, check available resources");

@@ -60,7 +60,7 @@ void RtspProvider::initialise() {
 
 Resource *RtspProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    return new RtspResource(resource);
+    return new RtspResource{resource, this};
   }
   setErrorString(
       "Unable to create unexisting resource, check available resources");

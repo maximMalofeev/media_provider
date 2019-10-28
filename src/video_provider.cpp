@@ -19,7 +19,7 @@ QString VideoProvider::provider() const { return PROVIDER_NAME; }
 
 Resource *VideoProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    return new VideoResource(getPath(resource));
+    return new VideoResource{getPath(resource), this};
   }
   setErrorString(
       "Unable to create unexisting resource, check available resources");

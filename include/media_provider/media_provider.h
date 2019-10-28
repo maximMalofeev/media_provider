@@ -223,7 +223,8 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
    */
   virtual QStringList availableResources() const;
   /**
-   * @brief creates Resource* from string representation
+   * @brief creates Resource* from string representation, the resource is a
+   * child of the Provider
    * @param resource - resource string representation, could be
    * received from availableResources() method
    * @return Resource* if success, nullptr otherwise

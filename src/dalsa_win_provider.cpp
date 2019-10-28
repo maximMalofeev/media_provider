@@ -120,7 +120,7 @@ void DalsaProvider::initialise() {
 
 Resource *DalsaProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    auto res = new DalsaResource{resource};
+    auto res = new DalsaResource{resource, this};
     connect(this, &DalsaProvider::serverDisconnected, res, &DalsaResource::onServerDisconnected);
     return res;
   }
