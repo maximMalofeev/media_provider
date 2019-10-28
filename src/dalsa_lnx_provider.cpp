@@ -11,7 +11,7 @@ constexpr int MAX_NETIF = 8;
 constexpr int MAX_CAMERAS_PER_NETIF = 32;
 constexpr int MAX_CAMERAS = MAX_NETIF * MAX_CAMERAS_PER_NETIF;
 
-const QString ORIGIN = "GIGE-V";
+const QString ORIGIN = "dalsa_server";
 const QString DALSA_MANUFACTURE = "Teledyne DALSA";
 
 const QString DalsaProvider::PROVIDER_NAME = "DALSA_PROVIDER";
@@ -23,7 +23,27 @@ struct DalsaProvider::Implementation {
 DalsaProvider::DalsaProvider(QObject *parent) : Provider(parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(ORIGIN);
+}
 
+DalsaProvider::~DalsaProvider() {
+  if (!impl_->availableCamerasWatcher.isFinished()) {
+    impl_->availableCamerasWatcher.waitForFinished();
+  }
+  qDebug() << "DalsaProvider::~DalsaProvider()";
+}
+
+QString DalsaProvider::provider() const { return PROVIDER_NAME; }
+
+bool DalsaProvider::setOrigin(const QString &orig) {
+  if (orig == ORIGIN || orig == "") {
+    return true;
+  }
+  setErrorString("Provider doesn't support setOrigin feature");
+  return false;
+}
+
+void DalsaProvider::initialise() {
+  setState(Initialising);
   connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished,
           [this]() {
             if (!impl_->availableCamerasWatcher.result()) {
@@ -54,23 +74,6 @@ DalsaProvider::DalsaProvider(QObject *parent) : Provider(parent) {
     return true;
   });
   impl_->availableCamerasWatcher.setFuture(availableCamerasFuture);
-}
-
-DalsaProvider::~DalsaProvider() {
-  if(!impl_->availableCamerasWatcher.isFinished()){
-    impl_->availableCamerasWatcher.waitForFinished();
-  }
-  qDebug() << "DalsaProvider::~DalsaProvider()";
-}
-
-QString DalsaProvider::provider() const { return PROVIDER_NAME; }
-
-bool DalsaProvider::setOrigin(const QString &orig) {
-  if (orig == ORIGIN || orig == "") {
-    return true;
-  }
-  setErrorString("Provider doesn't support setOrigin feature");
-  return false;
 }
 
 Resource *DalsaProvider::createResource(const QString &resource) {
