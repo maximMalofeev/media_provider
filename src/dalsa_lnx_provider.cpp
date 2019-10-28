@@ -78,7 +78,7 @@ void DalsaProvider::initialise() {
 
 Resource *DalsaProvider::createResource(const QString &resource) {
   if (availableResources().contains(resource)) {
-    return new DalsaResource(resource);
+    return new DalsaResource{resource, this};
   }
   setErrorString("There is no requested resource");
   return {};

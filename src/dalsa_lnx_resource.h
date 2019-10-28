@@ -8,15 +8,17 @@ namespace MediaProvider {
 class DalsaResource : public Resource {
  public:
   DalsaResource(const QString& res, QObject* parent = nullptr);
-  ~DalsaResource();
+  ~DalsaResource() override;
 
-  QSize size() const;
-  bool setSize(const QSize& size);
-  QList<QVariant> availableSizes() const;
-  QList<QVariant> availableColorFormats() const;
-  QImage::Format colorFormat() const;
-  bool setColorFormat(QImage::Format format);
-  Stream* stream();
+  QSize size() const override;
+  bool setSize(const QSize& size) override;
+  QList<QVariant> availableSizes() const override;
+  QList<QVariant> availableColorFormats() const override;
+  QImage::Format colorFormat() const override;
+  bool setColorFormat(QImage::Format format) override;
+  Stream* stream() override;
+
+  void initialise() override;
 
  private:
   struct Implementation;

@@ -19,8 +19,10 @@ class TestImageProvider : public QObject {
   MediaProvider::Provider* provider_ = {};
 };
 
-QStringList acceptedFiles{"file.jpg", "file.jpeg", "file.bmp", "file.png"};
-QStringList inacceptedFiles{"file.gif", "file.svg"};
+static QStringList acceptedFiles{"file.jpg", "file.jpeg", "file.bmp", "file.png"};
+static QStringList inacceptedFiles{"file.gif", "file.svg"};
+
+static QString tmpDir = "./mediaFolder";
 
 void TestImageProvider::initTestCase() {
   provider_ = MediaProvider::Provider::createProvider("IMAGE_PROVIDER");
@@ -31,6 +33,10 @@ void TestImageProvider::initTestCase() {
     QVERIFY(f.open(QIODevice::ReadWrite));
     f.close();
   }
+
+  QDir dir;
+  QVERIFY(dir.mkdir(tmpDir));
+
   for (auto& item : inacceptedFiles) {
     QFile f(item);
     QVERIFY(f.open(QIODevice::ReadWrite));
@@ -43,13 +49,21 @@ void TestImageProvider::test_checkIfDefaultOriginIsCurrentPath() {
 }
 
 void TestImageProvider::test_setOrigin() {
+#ifdef WIN32
   QString newOrigin = "f:/mediaFolder";
+#else
+  QString newOrigin = tmpDir;
+#endif
   QVERIFY(provider_->setOrigin(newOrigin));
   QCOMPARE(newOrigin, provider_->origin());
 }
 
 void TestImageProvider::test_setUnexistsOrigin() {
+#ifdef WIN32
   QString unexistsOrigin = "f:/mediaFolder/unexists";
+#else
+  QString unexistsOrigin = "/mediaFolder/unexists";
+#endif
   QCOMPARE(provider_->setOrigin(unexistsOrigin), false);
 }
 
@@ -80,6 +94,10 @@ void TestImageProvider::test_createResource() {
 
 void TestImageProvider::cleanupTestCase() {
   delete provider_;
+
+  QDir dir;
+  dir.rmdir(tmpDir);
+
   for (auto& item : acceptedFiles) {
     QFile::remove(item);
   }

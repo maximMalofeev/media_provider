@@ -18,8 +18,10 @@ class TestVideoProvider : public QObject {
   MediaProvider::Provider* provider_ = {};
 };
 
-QStringList acceptedFiles{"file.mp4", "file.avi", "file.webm"};
-QStringList inacceptedFiles{"file.flv", "file.wmv"};
+static QStringList acceptedFiles{"file.mp4", "file.avi", "file.webm"};
+static QStringList inacceptedFiles{"file.flv", "file.wmv"};
+
+static QString tmpDir = "./mediaFolder";
 
 void TestVideoProvider::initTestCase() {
   provider_ = MediaProvider::Provider::createProvider("VIDEO_PROVIDER");
@@ -28,7 +30,12 @@ void TestVideoProvider::initTestCase() {
   for (auto& item : acceptedFiles) {
     QFile f(item);
     QVERIFY(f.open(QIODevice::ReadWrite));
+    f.close();
   }
+
+  QDir dir;
+  QVERIFY(dir.mkdir(tmpDir));
+
   for (auto& item : inacceptedFiles) {
     QFile f(item);
     QVERIFY(f.open(QIODevice::ReadWrite));
@@ -40,13 +47,21 @@ void TestVideoProvider::test_checkIfDefaultOriginIsCurrentPath() {
 }
 
 void TestVideoProvider::test_setOrigin() {
+#ifdef WIN32
   QString newOrigin = "f:/mediaFolder";
+#else
+  QString newOrigin = tmpDir;
+#endif
   QVERIFY(provider_->setOrigin(newOrigin));
   QCOMPARE(newOrigin, provider_->origin());
 }
 
 void TestVideoProvider::test_setUnexistsOrigin() {
+#ifdef WIN32
   QString unexistsOrigin = "f:/mediaFolder/unexists";
+#else
+  QString unexistsOrigin = "/mediaFolder/unexists";
+#endif
   QCOMPARE(provider_->setOrigin(unexistsOrigin), false);
 }
 
@@ -62,7 +77,11 @@ void TestVideoProvider::test_checkAvailableResources() {
 }
 
 void TestVideoProvider::cleanupTestCase() {
-  provider_->deleteLater();
+  delete provider_;
+
+  QDir dir;
+  dir.rmdir(tmpDir);
+
   for (auto& item : acceptedFiles) {
     QFile::remove(item);
   }
