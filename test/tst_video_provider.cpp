@@ -5,16 +5,14 @@
 class TestVideoProvider : public QObject {
   Q_OBJECT
 
- public:
-  TestVideoProvider();
-  ~TestVideoProvider();
-
  private slots:
+  void initTestCase();
   void test_checkIfDefaultOriginIsCurrentPath();
   void test_setOrigin();
   void test_setUnexistsOrigin();
   void test_setEmptyOrigin();
   void test_checkAvailableResources();
+  void cleanupTestCase();
 
  private:
   MediaProvider::Provider* provider_ = {};
@@ -23,8 +21,8 @@ class TestVideoProvider : public QObject {
 QStringList acceptedFiles{"file.mp4", "file.avi", "file.webm"};
 QStringList inacceptedFiles{"file.flv", "file.wmv"};
 
-TestVideoProvider::TestVideoProvider() {
-  provider_ = MediaProvider::Provider::createProvider("VideoProvider");
+void TestVideoProvider::initTestCase() {
+  provider_ = MediaProvider::Provider::createProvider("VIDEO_PROVIDER");
   QVERIFY(provider_);
   acceptedFiles.sort();
   for (auto& item : acceptedFiles) {
@@ -34,16 +32,6 @@ TestVideoProvider::TestVideoProvider() {
   for (auto& item : inacceptedFiles) {
     QFile f(item);
     QVERIFY(f.open(QIODevice::ReadWrite));
-  }
-}
-
-TestVideoProvider::~TestVideoProvider() {
-  provider_->deleteLater();
-  for (auto& item : acceptedFiles) {
-    QFile::remove(item);
-  }
-  for (auto& item : inacceptedFiles) {
-    QFile::remove(item);
   }
 }
 
@@ -68,10 +56,21 @@ void TestVideoProvider::test_setEmptyOrigin() {
 }
 
 void TestVideoProvider::test_checkAvailableResources() {
+  provider_->initialise();
   auto res = provider_->availableResources();
   QCOMPARE(res, acceptedFiles);
 }
 
-QTEST_APPLESS_MAIN(TestVideoProvider)
+void TestVideoProvider::cleanupTestCase() {
+  provider_->deleteLater();
+  for (auto& item : acceptedFiles) {
+    QFile::remove(item);
+  }
+  for (auto& item : inacceptedFiles) {
+    QFile::remove(item);
+  }
+}
+
+QTEST_MAIN(TestVideoProvider)
 
 #include "tst_video_provider.moc"

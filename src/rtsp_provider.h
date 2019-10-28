@@ -12,6 +12,7 @@ class RtspProvider : public Provider {
 
   QString provider() const override;
   bool setOrigin(const QString &orig) override;
+  void initialise() override;
   Resource *createResource(const QString &resource) override;
 
   static const QString PROVIDER_NAME;

@@ -49,6 +49,30 @@ struct DalsaProvider::Implementation {
 DalsaProvider::DalsaProvider(QObject *parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(DEFAULT_ORIGIN);
+}
+
+DalsaProvider::~DalsaProvider() {
+  if (!SapManager::UnregisterServerCallback()) {
+    qWarning() << "Unable to unregister server callback, reson:" << SapManager::GetLastStatus();
+  }
+  if(!SapManager::Close()){
+    qWarning() << "Unable to close sap, reson:" << SapManager::GetLastStatus();
+  }
+}
+
+QString DalsaProvider::provider() const { return PROVIDER_NAME; }
+
+bool DalsaProvider::setOrigin(const QString &orig) {
+  if (origin() == orig || orig == "") {
+    return true;
+  }
+  setErrorString(
+      "Unable to set origin, SpaeraProvider supports only default origin");
+  return false;
+}
+
+void DalsaProvider::initialise() {
+  setState(Initialising);
 
   SapManager::Open();
   SapManager::SetDisplayStatusMode(SapManager::StatusLog);
@@ -56,9 +80,6 @@ DalsaProvider::DalsaProvider(QObject *parent) {
 
   connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished,
           [this]() {
-            setAvailableResources(impl_->resourcesWartcher.result());
-            setState(Initialised);
-
             if (!SapManager::RegisterServerCallback(
                     SapManager::EventServerDisconnected |
                         SapManager::EventServerNew |
@@ -69,7 +90,11 @@ DalsaProvider::DalsaProvider(QObject *parent) {
               setErrorString(
                   QString("Unable to register server callback, reason: ") +
                   SapManager::GetLastStatus());
+              return;
             }
+
+            setAvailableResources(impl_->resourcesWartcher.result());
+            setState(Initialised);
           });
 
   auto resourcesFuture = QtConcurrent::run([]() {
@@ -91,26 +116,6 @@ DalsaProvider::DalsaProvider(QObject *parent) {
   });
 
   impl_->resourcesWartcher.setFuture(resourcesFuture);
-}
-
-DalsaProvider::~DalsaProvider() {
-  if (!SapManager::UnregisterServerCallback()) {
-    qWarning() << "Unable to unregister server callback, reson:" << SapManager::GetLastStatus();
-  }
-  if(!SapManager::Close()){
-    qWarning() << "Unable to close sap, reson:" << SapManager::GetLastStatus();
-  }
-}
-
-QString DalsaProvider::provider() const { return PROVIDER_NAME; }
-
-bool DalsaProvider::setOrigin(const QString &orig) {
-  if (origin() == orig || orig == "") {
-    return true;
-  }
-  setErrorString(
-      "Unable to set origin, SpaeraProvider supports only default origin");
-  return false;
 }
 
 Resource *DalsaProvider::createResource(const QString &resource) {

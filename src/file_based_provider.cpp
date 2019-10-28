@@ -19,28 +19,34 @@ FileBasedProvider::FileBasedProvider(const QStringList &filters,
   impl_.reset(new Implementation);
   setOrigin(QDir::currentPath());
   impl_->filters = filters;
-  setAvailableResources(impl_->getAvailableResources(origin()));
-  setState(Initialised);
-  startTimer(1000);
 }
 
 FileBasedProvider::~FileBasedProvider() = default;
 
 bool FileBasedProvider::setOrigin(const QString &orig) {
   if (orig == "") {
-    if (origin() != QDir::currentPath()) {
-      Provider::setOrigin(QDir::currentPath());
-      setAvailableResources(impl_->getAvailableResources(origin()));
+    Provider::setOrigin(QDir::currentPath());
+  } else {
+    if (!QDir(orig).exists()) {
+      setErrorString(orig + " not exists");
+      return false;
+    } else {
+      Provider::setOrigin(orig);
     }
-    return true;
-  } else if (!QDir(orig).exists()) {
-    setErrorString(orig + " not exists");
-    return false;
   }
 
-  Provider::setOrigin(orig);
-  setAvailableResources(impl_->getAvailableResources(origin()));
+  if (state() == Initialised) {
+    initialise();
+  }
+
   return true;
+}
+
+void FileBasedProvider::initialise() {
+  setState(Initialising);
+  setAvailableResources(impl_->getAvailableResources(origin()));
+  startTimer(1000);
+  setState(Initialised);
 }
 
 void FileBasedProvider::timerEvent(QTimerEvent *event) {

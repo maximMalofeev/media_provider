@@ -95,7 +95,7 @@ QString Resource::errorString() const { return impl_->lastError; }
 
 // ==================Provider==================
 struct Provider::Implementation {
-    State state = Initialising;
+    State state = NotInitialised;
     QString origin;
     QStringList availableResources;
     QString lastError;

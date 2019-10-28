@@ -5,17 +5,15 @@
 class TestImageProvider : public QObject {
   Q_OBJECT
 
- public:
-  TestImageProvider();
-  ~TestImageProvider();
-
  private slots:
+  void initTestCase();
   void test_checkIfDefaultOriginIsCurrentPath();
   void test_setOrigin();
   void test_setUnexistsOrigin();
   void test_setEmptyOrigin();
   void test_checkAvailableResources();
   void test_createResource();
+  void cleanupTestCase();
 
  private:
   MediaProvider::Provider* provider_ = {};
@@ -24,8 +22,8 @@ class TestImageProvider : public QObject {
 QStringList acceptedFiles{"file.jpg", "file.jpeg", "file.bmp", "file.png"};
 QStringList inacceptedFiles{"file.gif", "file.svg"};
 
-TestImageProvider::TestImageProvider() {
-  provider_ = MediaProvider::Provider::createProvider("ImageProvider");
+void TestImageProvider::initTestCase() {
+  provider_ = MediaProvider::Provider::createProvider("IMAGE_PROVIDER");
   QVERIFY(provider_);
   acceptedFiles.sort();
   for (auto& item : acceptedFiles) {
@@ -37,16 +35,6 @@ TestImageProvider::TestImageProvider() {
     QFile f(item);
     QVERIFY(f.open(QIODevice::ReadWrite));
     f.close();
-  }
-}
-
-TestImageProvider::~TestImageProvider() {
-  delete provider_;
-  for (auto& item : acceptedFiles) {
-    QFile::remove(item);
-  }
-  for (auto& item : inacceptedFiles) {
-    QFile::remove(item);
   }
 }
 
@@ -71,6 +59,7 @@ void TestImageProvider::test_setEmptyOrigin() {
 }
 
 void TestImageProvider::test_checkAvailableResources() {
+  provider_->initialise();
   auto res = provider_->availableResources();
   QCOMPARE(res, acceptedFiles);
 }
@@ -84,8 +73,18 @@ void TestImageProvider::test_createResource() {
   auto resource = provider_->createResource(resStr);
   QSignalSpy stateChangedSpy(resource, SIGNAL(stateChanged()));
   QVERIFY(resource);
-  QCOMPARE(provider_->origin() + "/" + resStr, resource->resource());
+  QCOMPARE(resStr, resource->resource());
   QVERIFY(stateChangedSpy.wait());
+}
+
+void TestImageProvider::cleanupTestCase() {
+  delete provider_;
+  for (auto& item : acceptedFiles) {
+    QFile::remove(item);
+  }
+  for (auto& item : inacceptedFiles) {
+    QFile::remove(item);
+  }
 }
 
 QTEST_MAIN(TestImageProvider)

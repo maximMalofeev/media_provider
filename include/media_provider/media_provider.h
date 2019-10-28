@@ -178,11 +178,12 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
  public:
   /**
    * @brief The State enum describes provider state,
+   * NotInitialised - default state of new object
    * Initialising - while trying to load a resource
    * Initialised - if resource loaded successfully
    * Invalid - if resouce loading failed
    */
-  enum State { Initialising, Initialised, Invalid };
+  enum State { NotInitialised, Initialising, Initialised, Invalid };
   Q_ENUM(State)
 
   ~Provider();
@@ -202,12 +203,17 @@ class MEDIAPROVIDERLIBSHARED_EXPORT Provider : public QObject {
    */
   virtual QString origin() const;
   /**
-   * @brief set origin of resources
+   * @brief set origin of resources, if provider was initialised
+   * reinitialise with the new origin
    * @param orig - if case of file resources it is a parent dir,
    * empty origin assume app current path
-   * @return true if succes, otherwise false
+   * @return true if succes(start reinitialise), otherwise false
    */
   virtual bool setOrigin(const QString& orig);
+  /**
+   * @brief initialise provider with an origin
+   */
+  virtual void initialise() = 0;
   /**
    * @brief this function return available resources of current origin
    * @return list of available resources

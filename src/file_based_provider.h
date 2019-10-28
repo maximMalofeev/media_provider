@@ -11,6 +11,7 @@ class FileBasedProvider : public Provider {
   ~FileBasedProvider();
 
   bool setOrigin(const QString &orig) override;
+  void initialise() override;
 
  protected:
   void timerEvent(QTimerEvent *event) override;

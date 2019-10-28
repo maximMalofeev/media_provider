@@ -26,10 +26,6 @@ struct RtspProvider::Implementation {
 RtspProvider::RtspProvider(QObject *parent) : Provider(parent) {
   impl_.reset(new Implementation);
   Provider::setOrigin(DEFAULT_ORIGIN);
-  if (QFile::exists(origin())) {
-    setAvailableResources(impl_->fetchAvailableResources(origin()));
-  }
-  setState(Initialised);
 }
 
 RtspProvider::~RtspProvider() {}
@@ -39,19 +35,27 @@ QString RtspProvider::provider() const { return PROVIDER_NAME; }
 bool RtspProvider::setOrigin(const QString &orig) {
   if (orig == "") {
     Provider::setOrigin(DEFAULT_ORIGIN);
-    setAvailableResources(impl_->fetchAvailableResources(origin()));
-    return true;
+  } else {
+    QFileInfo fi(orig);
+    if (fi.exists() && fi.isFile()) {
+      Provider::setOrigin(orig);
+    } else {
+      setErrorString(orig + " unexists");
+      return false;
+    }
   }
 
-  QFileInfo fi(orig);
-  if (fi.exists() && fi.isFile()) {
-    Provider::setOrigin(orig);
-    setAvailableResources(impl_->fetchAvailableResources(origin()));
-    return true;
+  if(state() == Initialised){
+    initialise();
   }
 
-  setErrorString(orig + " unexists");
-  return false;
+  return true;
+}
+
+void RtspProvider::initialise() {
+  setState(Initialising);
+  setAvailableResources(impl_->fetchAvailableResources(origin()));
+  setState(Initialised);
 }
 
 Resource *RtspProvider::createResource(const QString &resource) {

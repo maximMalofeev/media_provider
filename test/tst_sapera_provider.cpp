@@ -4,27 +4,21 @@
 class TestSaperaProvider : public QObject {
   Q_OBJECT
 
- public:
-  TestSaperaProvider();
-  ~TestSaperaProvider();
-
  private slots:
+  void initTestCase();
   void test_checkIfDefaultOriginIsSaperaServer();
   void test_setOrigin();
   void test_setUnexistsOrigin();
   void test_setEmptyOrigin();
+  void cleanupTestCase();
 
  private:
   MediaProvider::Provider* provider_ = {};
 };
 
-TestSaperaProvider::TestSaperaProvider() {
-  provider_ = MediaProvider::Provider::createProvider("SaperaProvider");
+void TestSaperaProvider::initTestCase() {
+  provider_ = MediaProvider::Provider::createProvider("DALSA_PROVIDER");
   QVERIFY(provider_);
-}
-
-TestSaperaProvider::~TestSaperaProvider() {
-  delete provider_;
 }
 
 void TestSaperaProvider::test_checkIfDefaultOriginIsSaperaServer() {
@@ -46,6 +40,8 @@ void TestSaperaProvider::test_setEmptyOrigin() {
   QVERIFY(provider_->setOrigin(""));
   QCOMPARE(provider_->origin(), "dalsa_server");
 }
+
+void TestSaperaProvider::cleanupTestCase() { delete provider_; }
 
 QTEST_MAIN(TestSaperaProvider)
 

@@ -17,6 +17,7 @@ class DalsaProvider : public Provider {
   QString provider() const override;
 
   bool setOrigin(const QString &orig) override;
+  void initialise() override;
   Resource *createResource(const QString &resource) override;
 
   static void onServerEvent(SapManCallbackInfo *callbackInfo);

@@ -5,45 +5,37 @@
 class TestRtspProvider : public QObject {
   Q_OBJECT
 
- public:
-  TestRtspProvider();
-  ~TestRtspProvider();
-
  private slots:
+  void initTestCase();
   void test_checkIfDefaultOriginIsRtspIni();
   void test_setUnexistsOrigin();
   void test_setEmptyOrigin();
   void test_setOrigin();
   void test_checkAvailableResources();
   void test_createResource();
+  void cleanupTestCase();
 
  private:
   MediaProvider::Provider* provider_ = {};
   QStringList availableResources_ = {
-    "rtsp://172.21.100.145/Streaming/Channels/1",
-    "rtsp://172.21.100.145/Streaming/Channels/2",
-    "rtsp://172.21.100.145/Streaming/Channels/3"
-  };
+      "rtsp://172.21.100.145/Streaming/Channels/1",
+      "rtsp://172.21.100.145/Streaming/Channels/2",
+      "rtsp://172.21.100.145/Streaming/Channels/3"};
 };
 
 QString newOrigin = "rtsp_origin.ini";
 
-TestRtspProvider::TestRtspProvider() {
-  provider_ = MediaProvider::Provider::createProvider("RtspProvider");
+void TestRtspProvider::initTestCase() {
+  provider_ = MediaProvider::Provider::createProvider("RTSP_PROVIDER");
   QVERIFY(provider_);
 
   QFile rtspOrigin(newOrigin);
   QVERIFY(rtspOrigin.open(QIODevice::ReadWrite | QIODevice::Text));
-  for(const auto& item : availableResources_){
+  for (const auto& item : availableResources_) {
     rtspOrigin.write(item.toUtf8());
     rtspOrigin.write("\n");
   }
   rtspOrigin.close();
-}
-
-TestRtspProvider::~TestRtspProvider() {
-  delete provider_;
-  QFile::remove(newOrigin);
 }
 
 void TestRtspProvider::test_checkIfDefaultOriginIsRtspIni() {
@@ -66,6 +58,7 @@ void TestRtspProvider::test_setOrigin() {
 }
 
 void TestRtspProvider::test_checkAvailableResources() {
+  provider_->initialise();
   auto res = provider_->availableResources();
   QCOMPARE(res, availableResources_);
 }
@@ -79,6 +72,11 @@ void TestRtspProvider::test_createResource() {
   auto resource = provider_->createResource(resStr);
   QVERIFY(resource);
   QCOMPARE(resStr, resource->resource());
+}
+
+void TestRtspProvider::cleanupTestCase() {
+  delete provider_;
+  QFile::remove(newOrigin);
 }
 
 QTEST_MAIN(TestRtspProvider)
