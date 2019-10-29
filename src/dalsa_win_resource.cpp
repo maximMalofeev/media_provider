@@ -182,8 +182,8 @@ void DalsaResource::initialise() {
 
 void DalsaResource::onServerDisconnected(const QString &serverName) {
   if (serverName == resource()) {
-    setState(Invalid);
     setErrorString("Server disconnected");
+    setState(Invalid);
   }
 }
 

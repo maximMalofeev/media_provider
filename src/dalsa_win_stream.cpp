@@ -38,27 +38,27 @@ bool DalsaStream::initialise() {
   impl_->sapBufWithTrash.reset(
       new SapBufferWithTrash{4, impl_->sapDevice.get()});
   if (!impl_->sapBufWithTrash->Create()) {
-    setState(Invalid);
     setErrorString(QString{"Unable to create SapBufferWithTrash, reason: "} +
                    impl_->sapBufWithTrash->GetLastStatus());
+    setState(Invalid);
     return false;
   }
 
   impl_->sapBufferProcessing =
       new DalsaBufferProcessing(impl_->sapBufWithTrash.get(), this);
   if (!impl_->sapBufferProcessing->Create()) {
-    setState(Invalid);
     setErrorString(QString{"Unable to create SapBufferProcessing, reason: "} +
                    impl_->sapBufferProcessing->GetLastStatus());
+    setState(Invalid);
     return false;
   }
   impl_->sapAcqDeviceToBuffer.reset(new SapAcqDeviceToBuf{
       impl_->sapDevice.get(), impl_->sapBufWithTrash.get(), XferCallback,
       impl_->sapBufferProcessing});
   if (!impl_->sapAcqDeviceToBuffer->Create()) {
-    setState(Invalid);
     setErrorString(QString{"Unable to create SapAcqDeviceToBuf, reason: "} +
                    impl_->sapAcqDeviceToBuffer->GetLastStatus());
+    setState(Invalid);
     return false;
   }
   // TODO figure out why i do SetAutoEmpty(false)
@@ -89,9 +89,9 @@ void DalsaStream::start() {
     return;
   }
   if (!impl_->sapAcqDeviceToBuffer->Grab()) {
-    setState(Invalid);
     setErrorString(QString{"Unable to grab, reason"} +
                    impl_->sapAcqDeviceToBuffer->GetLastStatus());
+    setState(Invalid);
     return;
   }
   setState(Playing);
