@@ -21,6 +21,7 @@ void Backend::resetProvider() {
   if (provider_) {
     provider_->deleteLater();
     provider_ = nullptr;
+    emit providerChanged();
   }
 }
 

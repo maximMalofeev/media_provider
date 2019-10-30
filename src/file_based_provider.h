@@ -8,7 +8,7 @@ namespace MediaProvider {
 class FileBasedProvider : public Provider {
  public:
   FileBasedProvider(const QStringList &filters, QObject *parent = nullptr);
-  ~FileBasedProvider();
+  ~FileBasedProvider() override;
 
   bool setOrigin(const QString &orig) override;
   void initialise() override;
