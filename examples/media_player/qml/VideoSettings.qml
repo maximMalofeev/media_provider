@@ -3,6 +3,8 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import MediaProvider 1.0
 
+import QtQuick.Controls.Universal 2.12
+
 Drawer {
     id: root
     width: 350
@@ -56,8 +58,7 @@ Drawer {
                 PropertyChanges {target: busyIndicator; running: backend.provider.state === Provider.Initialising}
                 PropertyChanges {target: currentProvider; visible: true; text: backend.provider.provider}
                 PropertyChanges {target: providerOrigin; visible: true; text: backend.provider.origin}
-                PropertyChanges {target: availableResources; visible: true}
-                PropertyChanges {target: availableResourcesList; model: backend.provider.availableResources}
+                PropertyChanges {target: availableResources; visible: true; model: backend.provider.availableResources}
             }
         ]
 
@@ -79,34 +80,30 @@ Drawer {
             columns: 2
             clip: true
 
-            Frame{
+            ListView{
                 id: availableProviders
-                Layout.columnSpan: 2
                 Layout.fillWidth: true
-                Layout.preferredHeight: availableProvidersList.contentHeight
-                padding: 5
-                ListView{
-                    id: availableProvidersList
-                    anchors.fill: parent
-                    model: backend.availableProviders()
-                    clip: true
-                    spacing: 1
-                    header: Label{
-                        width: parent.width
-                        text: qsTr("Providers:")
-                        horizontalAlignment: Qt.AlignHCenter
-                    }
-                    delegate: ItemDelegate {
-                        width: parent.width
-                        text: modelData
-                        onClicked: {
-                            backend.createProvider(modelData)
-                            if(backend.provider){
-                                backend.provider.initialise()
-                            }
+                Layout.columnSpan: 2
+                Layout.preferredHeight: contentHeight
+                model: backend.availableProviders()
+                clip: true
+                spacing: 1
+                header: Label{
+                    width: parent.width
+                    text: qsTr("Providers:")
+                    horizontalAlignment: Qt.AlignHCenter
+                }
+                delegate: ItemDelegate {
+                    width: parent.width
+                    text: modelData
+                    onClicked: {
+                        backend.createProvider(modelData)
+                        if(backend.provider){
+                            backend.provider.initialise()
                         }
                     }
                 }
+                Frame {anchors.fill: parent; z: -1}
             }
             Label{
                 text: qsTr("Provider:")
@@ -143,36 +140,30 @@ Drawer {
                 color: "red"
                 visible: false
             }
-            Frame{
+
+            ListView{
                 id: availableResources
                 Layout.fillWidth: true
                 Layout.columnSpan: 2
-                Layout.preferredHeight: availableResourcesList.contentPlusMargin < 300 ? availableResourcesList.contentPlusMargin : 300
-                padding: 5
+                Layout.preferredHeight: contentHeight > 300 ? 300 : contentHeight
+                width: parent.width
+                clip: true
                 visible: false
+                ScrollBar.vertical: ScrollBar {topInset: 2; rightInset: 2; bottomInset: 2}
 
-                ScrollView{
-                    anchors.fill: parent
-                    ListView{
-                        property int contentPlusMargin: contentHeight + anchors.margins * 2
-                        id: availableResourcesList
-                        width: parent.width
-                        clip: true
-
-                        header: Label{
-                            width: parent.width
-                            text: qsTr("Resources:")
-                            horizontalAlignment: Qt.AlignHCenter
-                        }
-                        delegate: ItemDelegate {
-                            width: parent.width
-                            text: modelData
-                            onClicked: {
-                                backend.createResource(modelData)
-                            }
-                        }
+                header: Label{
+                    width: parent.width
+                    text: qsTr("Resources:")
+                    horizontalAlignment: Qt.AlignHCenter
+                }
+                delegate: ItemDelegate {
+                    width: parent.width
+                    text: modelData
+                    onClicked: {
+                        backend.createResource(modelData)
                     }
                 }
+                Frame {anchors.fill: parent; z: -1}
             }
 
             Label{
@@ -202,11 +193,14 @@ Drawer {
                 id: resolutions
                 Layout.fillWidth: true
                 visible: false
-                //TODO add default background
+                editable: false
+                Universal.theme: editable && activeFocus ? Universal.Light : undefined
                 delegate: ItemDelegate{
                     width: parent.width
                     text: modelData.width + " x " + modelData.height
                     highlighted: parent.highlightedIndex === index
+                    font.weight: parent.currentIndex === index ? Font.DemiBold : Font.Normal
+                    hoverEnabled: parent.hoverEnabled
                 }
                 contentItem: Label{
                     verticalAlignment: Qt.AlignVCenter
@@ -225,6 +219,13 @@ Drawer {
                 id: formats
                 Layout.fillWidth: true
                 visible: false
+                delegate: ItemDelegate{
+                    width: parent.width
+                    text: modelData
+                    highlighted: parent.highlightedIndex === index
+                    font.weight: parent.currentIndex === index ? Font.DemiBold : Font.Normal
+                    hoverEnabled: parent.hoverEnabled
+                }
             }
 
             Button{
