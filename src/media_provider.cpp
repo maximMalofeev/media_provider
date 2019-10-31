@@ -25,14 +25,14 @@ struct Stream::Implementation {
 Stream::Stream(Resource *parent) : QObject(parent) {
   impl_.reset(new Implementation);
   impl_->resource = parent;
-  connect(parent, &Resource::stateChanged, [this]() {
+  connect(parent, &Resource::stateChanged, this, [this]() {
     auto res = dynamic_cast<Resource *>(this->parent());
     if (res && res->state() == Resource::Invalid) {
       setErrorString("Resource switched to Invalid state: " +
                      res->errorString());
       setState(Invalid);
     }
-  });
+  }, Qt::QueuedConnection);
 }
 
 void Stream::setState(State state) {

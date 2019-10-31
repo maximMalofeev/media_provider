@@ -75,7 +75,7 @@ Stream* ImageResource::stream() { return impl_->stream; }
 
 void ImageResource::initialise() {
   setState(Initialising);
-  connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, [this]() {
+  connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, this, [this]() {
     if (impl_->imageWatcher.result()) {
       setState(Initialised);
     } else {
@@ -86,7 +86,7 @@ void ImageResource::initialise() {
     emit colorFormatChanged();
     emit availableSizesChanged();
     emit availableColorFormatsChanged();
-  });
+  }, Qt::QueuedConnection);
 
   impl_->stream = new ImageStream(&impl_->image, this);
   auto future = QtConcurrent::run([this]() {

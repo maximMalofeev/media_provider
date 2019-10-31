@@ -15,9 +15,9 @@ struct VideoSurface::Implementation {
 
 VideoSurface::VideoSurface(QObject* parent) : QAbstractVideoSurface(parent) {
   impl_.reset(new Implementation);
-  connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, [this]() {
+  connect(&impl_->imageWatcher, &QFutureWatcher<QImage>::finished, this, [this]() {
     emit newFrame(impl_->imageWatcher.result(), impl_->timestamp);
-  });
+  }, Qt::QueuedConnection);
 }
 
 VideoSurface::~VideoSurface() {}

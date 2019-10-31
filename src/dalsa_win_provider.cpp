@@ -78,7 +78,7 @@ void DalsaProvider::initialise() {
   SapManager::SetDisplayStatusMode(SapManager::StatusLog);
   SapManager::SetCommandTimeout(5000);
 
-  connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished,
+  connect(&impl_->resourcesWartcher, &QFutureWatcher<QStringList>::finished, this,
           [this]() {
             if (!SapManager::RegisterServerCallback(
                     SapManager::EventServerDisconnected |
@@ -95,7 +95,7 @@ void DalsaProvider::initialise() {
 
             setAvailableResources(impl_->resourcesWartcher.result());
             setState(Initialised);
-          });
+          }, Qt::QueuedConnection);
 
   auto resourcesFuture = QtConcurrent::run([]() {
     QStringList sources;

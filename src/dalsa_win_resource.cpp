@@ -86,7 +86,7 @@ Stream *DalsaResource::stream() { return impl_->stream; }
 void DalsaResource::initialise() {
   setState(Initialising);
 
-  connect(&impl_->initWatcher, &QFutureWatcher<bool>::finished, [this]() {
+  connect(&impl_->initWatcher, &QFutureWatcher<bool>::finished, this, [this]() {
     if (impl_->initWatcher.result() && impl_->stream->initialise()) {
       setState(Initialised);
       emit sizeChanged();
@@ -96,7 +96,7 @@ void DalsaResource::initialise() {
     } else {
       setState(Invalid);
     }
-  });
+  }, Qt::QueuedConnection);
 
   auto future = QtConcurrent::run([this]() {
     if (impl_->stream->sapDevice()->Create()) {

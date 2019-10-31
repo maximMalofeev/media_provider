@@ -89,7 +89,7 @@ Stream *DalsaResource::stream() { return impl_->stream; }
 
 void DalsaResource::initialise() {
   setState(Initialising);
-  connect(&impl_->initialisationWatcher, &QFutureWatcher<bool>::finished,
+  connect(&impl_->initialisationWatcher, &QFutureWatcher<bool>::finished, this,
           [this]() {
             if (!impl_->initialisationWatcher.result()) {
               setState(Invalid);
@@ -101,7 +101,7 @@ void DalsaResource::initialise() {
             emit colorFormatChanged();
             emit availableSizesChanged();
             emit availableColorFormatsChanged();
-          });
+          }, Qt::QueuedConnection);
 
   auto initialisationFuture = QtConcurrent::run([this]() {
     auto status = GevOpenCameraByName(

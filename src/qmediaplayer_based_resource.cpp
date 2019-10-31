@@ -16,7 +16,7 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
   impl_.reset(new Implementation);
   impl_->player = new QMediaPlayer(this, QMediaPlayer::VideoSurface);
   connect(
-      impl_->player, &QMediaPlayer::mediaStatusChanged,
+      impl_->player, &QMediaPlayer::mediaStatusChanged, this,
       [this](QMediaPlayer::MediaStatus status) {
         qDebug() << "Media status changed to" << status;
         if (status == QMediaPlayer::LoadedMedia && state() == Initialising) {
@@ -30,9 +30,9 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
           setState(Invalid);
           setErrorString(impl_->player->errorString());
         }
-      });
+      }, Qt::QueuedConnection);
   connect(impl_->player,
-          QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error),
+          QOverload<QMediaPlayer::Error>::of(&QMediaPlayer::error), this,
           [this](QMediaPlayer::Error error) {
             qDebug() << "Media player error:" << error << "-"
                      << impl_->player->errorString();
@@ -42,7 +42,7 @@ QMediaPlayerBasedResource::QMediaPlayerBasedResource(const QString& res,
               errStr += " - " + impl_->player->errorString();
             }
             setErrorString(errStr);
-          });
+          }, Qt::QueuedConnection);
 
   impl_->videoSurface = new VideoSurface(impl_->player);
   impl_->player->setVideoOutput(impl_->videoSurface);

@@ -44,14 +44,14 @@ bool DalsaProvider::setOrigin(const QString &orig) {
 
 void DalsaProvider::initialise() {
   setState(Initialising);
-  connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished,
+  connect(&impl_->availableCamerasWatcher, &QFutureWatcher<bool>::finished, this,
           [this]() {
             if (!impl_->availableCamerasWatcher.result()) {
               setState(Invalid);
               return;
             }
             setState(Initialised);
-          });
+          }, Qt::QueuedConnection);
 
   auto availableCamerasFuture = QtConcurrent::run([this]() {
     GEV_DEVICE_INTERFACE pCamera[MAX_CAMERAS]{};
