@@ -17,8 +17,8 @@ struct DalsaStream::Implementation {
 DalsaStream::DalsaStream(const QString &resource, Resource *parent)
     : Stream(parent) {
   impl_.reset(new Implementation);
-  impl_->sapDevice.reset(
-      new SapAcqDevice{SapLocation{resource.toStdString().c_str()}});
+  impl_->sapDevice.reset(new SapAcqDevice{
+      SapLocation{SapManager::GetServerIndex(resource.toStdString().c_str())}});
 }
 
 DalsaStream::~DalsaStream() {
